@@ -502,3 +502,259 @@ input[placeholder="Search"]::placeholder {
         transform: translateY(0);
     }
 }
+
+/* ------------------------------ */
+/* Shop By Detail – tone & layout */
+/* Override to fit page width and Nike tone, with seamless marquee */
+.shop-by-detail {
+    overflow: hidden; /* hide overflow for marquee */
+}
+
+/* Track becomes a flex marquee (overrides grid/scroll styles above) */
+.shop-by-detail .sbd-track {
+    display: flex !important;
+    gap: 16px !important;
+    align-items: stretch;
+    width: max-content; /* shrink to content for correct translate */
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+    padding-bottom: 0 !important;
+    animation: sbd-marquee 42s linear infinite; /* slow and smooth */
+    will-change: transform;
+}
+
+.shop-by-detail:hover .sbd-track {
+    animation-play-state: paused; /* pause on hover */
+}
+
+/* Each item is a fixed-width card to keep rhythm; responsive widths */
+.shop-by-detail .sbd-item {
+    flex: 0 0 auto;
+    width: 200px;
+}
+
+@media (min-width: 576px) {
+    .shop-by-detail .sbd-item { width: 220px; }
+}
+
+@media (min-width: 992px) {
+    .shop-by-detail .sbd-item { width: 240px; }
+}
+
+/* Card visuals tuned to tone */
+.shop-by-detail .sbd-card {
+    border-radius: 12px !important;
+    border-color: var(--nike-border) !important;
+    background: #fff !important;
+}
+
+/* Thumb keep 4:3 for marquee balance; center content */
+.shop-by-detail .sbd-thumb {
+    aspect-ratio: 4 / 3 !important;
+    padding: 10px;
+    background: linear-gradient(180deg, #F5F5F5 0%, #EBEEF0 100%) !important;
+}
+
+.shop-by-detail .sbd-thumb img {
+    max-width: 90% !important;
+    max-height: 90% !important;
+}
+
+/* Label weight, tracking and spacing fit Nike tone */
+.shop-by-detail .sbd-label {
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+    padding: 10px 6px 14px !important;
+}
+
+/* Edge fade (where supported) for nicer clipping */
+.shop-by-detail .container-fluid {
+    /* create a gentle mask at container edges if supported */
+    -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0, #000 40px, #000 calc(100% - 40px), rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0, #000 40px, #000 calc(100% - 40px), rgba(0,0,0,0) 100%);
+}
+
+@keyframes sbd-marquee {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); } /* relies on duplicated items */
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .shop-by-detail .sbd-track { animation: none !important; transform: none !important; }
+}
+
+/* ----------------------------------------- */
+/* Mega dropdown for Men/Women/Kids (hover)  */
+.navbar-nav .nav-item.has-mega {
+    position: relative;
+}
+
+.navbar-nav .nav-item.has-mega .mega-dropdown {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    top: 100%;
+    min-width: 720px;
+    background: #fff;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    border-radius: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 160ms ease, transform 200ms ease, visibility 0s linear 200ms;
+    z-index: 1050;
+    padding: 18px 18px 12px;
+}
+
+.navbar-nav .nav-item.has-mega:hover > .mega-dropdown,
+.navbar-nav .nav-item.has-mega:focus-within > .mega-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    transition-delay: 0s;
+}
+
+.mega-dropdown .mega-inner {
+    width: 100%;
+}
+
+.mega-dropdown .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-nav .nav-item.has-mega .mega-dropdown { min-width: 90vw; }
+    .mega-dropdown .brand-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.brand-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    background: #fff;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.brand-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    border-color: #000;
+}
+
+.brand-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #F5F5F5 0%, #EBEEF0 100%);
+}
+
+.brand-thumb img {
+    max-width: 86%;
+    max-height: 86%;
+    object-fit: contain;
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 8px 6px 12px;
+    text-align: center;
+}
+
+/* Text lists layout (two columns) for brand mega */
+.mega-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 28px 48px;
+}
+
+.mega-col {}
+
+.mega-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+}
+
+.mega-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mega-list li + li { margin-top: 10px; }
+
+.mega-list a {
+    color: #111;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 180ms ease, opacity 180ms ease;
+}
+
+.mega-list a:hover {
+    color: #8C8C8C;
+}
+
+@media (max-width: 991.98px) {
+    .mega-columns { grid-template-columns: 1fr; gap: 20px; }
+}
+
+/* Men brand page styles */
+.men-page .brand-subnav {
+    position: sticky;
+    top: var(--sticky-offset, 64px);
+    z-index: 1020;
+    background: #fff;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-top: 1px solid #E5E5E5;
+    border-bottom: 1px solid #E5E5E5;
+    /* stretch to viewport width to align with header */
+    margin-left: -3rem;
+    margin-right: -3rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+@media (max-width: 1200px) {
+    .men-page .brand-subnav {
+        margin-left: -2rem;
+        margin-right: -2rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .men-page .brand-subnav {
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+.men-page .brand-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* Avoid headings being hidden under sticky subnav when navigating to anchors */
+.men-page .brand-section { scroll-margin-top: calc(var(--sticky-offset, 64px) + 56px); }
+
+/* Smooth anchor scroll with offset handled by sticky subnav height via padding */
+html { scroll-behavior: smooth; }
+
+/* Remove bottom gap on men page */
+.men-page { padding-bottom: 0 !important; margin-bottom: 0 !important; }

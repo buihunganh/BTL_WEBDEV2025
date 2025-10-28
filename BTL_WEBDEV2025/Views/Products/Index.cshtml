@@ -1,112 +1,18 @@
-@model List<Product>
 @{
     ViewData["Title"] = "Products";
+    var target = Url.Action("Men", "Products");
 }
 
 <div class="container-fluid px-4 my-4">
-    <h1 class="fw-bold mb-4">All Products</h1>
-    
-    <!-- Filter and Sort Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
-        </div>
-        <div class="col-md-6 text-end">
-            <select class="form-select d-inline-block" style="width: auto;" id="sortSelect">
-                <option value="name">Sort by Name</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="newest">Newest First</option>
-            </select>
-        </div>
-    </div>
-    
-    <!-- Products Grid -->
-    <div class="row g-4" id="productsGrid">
-        @foreach (var product in Model)
-        {
-            <div class="col-md-6 col-lg-3 product-card" data-category="@product.Category" data-price="@product.Price">
-                <div class="card h-100 border shadow-sm hover-lift">
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                        <i class="bi bi-image fs-1 text-secondary"></i>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">@product.Name</h5>
-                        <p class="card-text small text-muted">@product.Description</p>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            @if (product.DiscountPrice.HasValue)
-                            {
-                                <span class="text-decoration-line-through text-muted small">$@product.Price</span>
-                                <span class="text-danger fw-bold fs-5">$@product.DiscountPrice</span>
-                            }
-                            else
-                            {
-                                <span class="fw-bold fs-5">$@product.Price</span>
-                            }
-                        </div>
-                        <button class="btn btn-dark w-100" onclick="addToCart(@product.Id, '@product.Name', @product.Price, '@product.ImageUrl')">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-    
-    <!-- Pagination (Demo) -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <nav aria-label="Product pagination">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
+    <p class="mb-2">Redirecting to <strong>Men</strong>...</p>
+    <p class="small text-muted">If you are not redirected automatically, <a href="@target">click here</a>.</p>
 </div>
 
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Search functionality with AJAX
-            $('#productSearch').on('input', function() {
-                const searchTerm = $(this).val().toLowerCase();
-                $('.product-card').each(function() {
-                    const productName = $(this).find('.card-title').text().toLowerCase();
-                    if (productName.includes(searchTerm)) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-            });
-            
-            // Sort functionality
-            $('#sortSelect').on('change', function() {
-                const sortBy = $(this).val();
-                const $products = $('.product-card');
-                
-                let sorted = $products.sort(function(a, b) {
-                    if (sortBy === 'name') {
-                        return $(a).find('.card-title').text().localeCompare($(b).find('.card-title').text());
-                    } else if (sortBy === 'price-asc') {
-                        return parseFloat($(a).data('price')) - parseFloat($(b).data('price'));
-                    } else if (sortBy === 'price-desc') {
-                        return parseFloat($(b).data('price')) - parseFloat($(a).data('price'));
-                    }
-                    return 0;
-                });
-                
-                $('#productsGrid').html(sorted);
-            });
-        });
-    </script>
-}
+<meta http-equiv="refresh" content="0; url=@target" />
+<script>
+  window.addEventListener('DOMContentLoaded', function(){
+    try { window.location.replace('@target'); } catch (e) { window.location.href='@target'; }
+  });
+  // Fallback timeout
+  setTimeout(function(){ if(location.pathname.toLowerCase().indexOf('/products/men') === -1){ location.href='@target'; } }, 500);
+</script>
