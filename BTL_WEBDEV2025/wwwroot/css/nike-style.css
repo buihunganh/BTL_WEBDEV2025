@@ -213,6 +213,23 @@ input[placeholder="Search"]::placeholder {
     border-color: #000;
 }
 
+/* Ensure all promo images fit their containers */
+.deal-image img,
+.feature-image img,
+.sbd-thumb img,
+.hero-video-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Unify gray backgrounds across modules */
+.deal-image,
+.feature-image,
+.sbd-thumb {
+    background-color: #EBEEF0 !important; /* unified soft gray */
+}
+
 /* Buttons subtle float on hover */
 .btn,
 .btn-dark,
@@ -243,6 +260,46 @@ input[placeholder="Search"]::placeholder {
 .hero-banner {
     border-radius: 0;
     overflow: hidden;
+}
+
+/* Hero video background */
+.hero-banner.has-video {
+    position: relative;
+    background: #000;
+}
+
+.hero-video-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.9; /* slightly dim video */
+}
+
+.hero-content-layer {
+    z-index: 1;
+    pointer-events: none; /* allow buttons wrapper to handle events */
+}
+
+.hero-content-layer .btn,
+.hero-content-layer .btn-dark,
+.hero-content-layer .btn-outline-dark {
+    pointer-events: auto;
+}
+
+@media (max-width: 767.98px) {
+    .hero-banner {
+        min-height: 70vh !important;
+    }
+    .hero-content-layer h1 {
+        font-size: 2.25rem !important;
+    }
 }
 
 .hero-section .btn-dark {
@@ -293,10 +350,81 @@ input[placeholder="Search"]::placeholder {
     border-color: #000 !important;
 }
 
+/* (reverted) removed uniform feature image background styles */
+
 /* Footer Styles */
 .footer-section {
     background-color: #000 !important;
     border-top: none;
+}
+
+/* Shop by Detail (simple cards) */
+.shop-by-detail .sbd-card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #E5E5E5;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.shop-by-detail .sbd-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.shop-by-detail .sbd-thumb {
+    background: linear-gradient(180deg, #3a444a 0%, #4b545a 60%, #7b858d 100%);
+    aspect-ratio: 1 / 1; /* square */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-by-detail .sbd-thumb img {
+    max-width: 92%;
+    max-height: 92%;
+    object-fit: contain;
+}
+
+/* spin animation when scrolling */
+.shop-by-detail .spin img {
+    animation: sbd-spin 800ms ease-out;
+}
+
+@keyframes sbd-spin {
+    from { transform: rotate(0deg) scale(1); }
+    to { transform: rotate(360deg) scale(1); }
+}
+
+.shop-by-detail .sbd-label {
+    text-align: center;
+    padding: 10px 8px 14px;
+    font-weight: 700;
+    color: #000;
+}
+
+/* Horizontal track with wheel-to-horizontal scroll */
+.shop-by-detail .sbd-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(160px, 1fr);
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+}
+
+.shop-by-detail .sbd-item {
+    scroll-snap-align: start;
+}
+
+.shop-by-detail .sbd-track::-webkit-scrollbar {
+    height: 6px;
+}
+.shop-by-detail .sbd-track::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
 }
 
 .footer-section h5,
