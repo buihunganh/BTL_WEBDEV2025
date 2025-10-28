@@ -1,8 +1,45 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+@await Html.PartialAsync("~/Views/Shared/Partials/_HeroSection.cshtml")
+
+<!-- Feature Section -->
+@await Html.PartialAsync("~/Views/Shared/Partials/_FeatureSection.cshtml")
+
+<!-- Special Deals Section -->
+@await Html.PartialAsync("~/Views/Shared/Partials/_SpecialDealsSection.cshtml")
+
+<!-- Shop by Icons Section -->
+@await Html.PartialAsync("~/Views/Shared/Partials/_ShopByIconsSection.cshtml")
+
+@section Scripts {
+    <script>
+        // AJAX search functionality
+        $(document).ready(function() {
+            $('.search-container input').on('keyup', function() {
+                var searchTerm = $(this).val();
+                // You can implement AJAX search here
+                console.log('Searching for:', searchTerm);
+            });
+            
+            // Add to cart functionality
+            $('.cart-icon').on('click', function(e) {
+                e.preventDefault();
+                alert('Cart clicked! Implement cart logic here.');
+            });
+            
+            // Smooth scroll to sections
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+                var target = $(this.getAttribute('href'));
+                if (target.length) {
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top - 80
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+}

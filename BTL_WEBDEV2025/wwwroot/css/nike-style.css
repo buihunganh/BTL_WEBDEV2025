@@ -1,0 +1,376 @@
+/* Nike Clone Custom Styles - Simplified */
+
+/* Global Styles */
+:root {
+    --nike-black: #000000;
+    --nike-gray: #8C8C8C;
+    --nike-light-gray: #F5F5F5;
+    --nike-hover: #E5E5E5;
+    --nike-border: #E5E5E5;
+}
+
+body {
+    font-family: "Helvetica Now Text", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--nike-black);
+    background: #fff;
+}
+
+/* Top Bar Styles */
+.top-bar {
+    font-size: 0.75rem;
+    background-color: #000000 !important;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    height: auto;
+}
+
+.top-bar .container-fluid {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.top-bar-links {
+    display: flex;
+    align-items: center;
+}
+
+.top-bar-links a {
+    transition: opacity 0.2s ease;
+}
+
+.top-bar-links a:hover {
+    opacity: 0.7;
+}
+
+.separator {
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 300;
+}
+
+/* Navigation Styles - Simple Layout */
+.navbar {
+    padding: 5px 0;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+.navbar .container-fluid {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+@media (min-width: 992px) {
+    .navbar .navbar-brand {
+        position: absolute;
+        left: 1.5rem;
+        z-index: 10;
+    }
+    
+    .navbar > .container-fluid > .d-none.d-lg-flex {
+        position: absolute;
+        right: 1.5rem;
+        z-index: 10;
+    }
+    
+    .navbar .collapse.navbar-collapse {
+        display: flex !important;
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .navbar-brand {
+        font-size: 1.5rem !important;
+    }
+}
+
+.navbar-brand {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #000 !important;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.navbar-brand:hover {
+    opacity: 0.7;
+}
+
+.navbar-nav .nav-link {
+    color: #000 !important;
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: color 0.25s ease, opacity 0.25s ease, transform 0.3s ease;
+    padding: 0.5rem 0.75rem !important;
+    letter-spacing: 0.01em;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #8C8C8C !important;
+    transform: translateY(-2px); /* Nâng các link khi hover */
+}
+
+/* Underline reveal animation for navbar links */
+.navbar-nav .nav-link {
+    position: relative;
+}
+
+.navbar-nav .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    margin: auto;
+    width: 0;
+    height: 2px;
+    background: #000;
+    transition: width 200ms ease;
+}
+
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link:focus-visible::after,
+.navbar-nav .nav-item.active .nav-link::after {
+    width: 100%;
+}
+
+/* Nav icons styling */
+.nav-icon {
+    transition: transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
+    display: inline-block;
+}
+
+.nav-icon:hover {
+    transform: translateY(-2px) scale(1.1); /* Phóng to và nâng lên khi hover */
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+}
+
+/* Search input */
+input[placeholder="Search"] {
+    transition: border-color 0.25s ease, width 200ms ease;
+}
+
+input[placeholder="Search"]:focus {
+    outline: none !important;
+    border-bottom-color: #000 !important;
+    box-shadow: none !important;
+}
+
+input[placeholder="Search"]::placeholder {
+    color: #8C8C8C;
+}
+
+/* Expand search width on focus (desktop) */
+@media (min-width: 992px) {
+    .navbar .position-relative input[placeholder="Search"] {
+        width: 150px;
+    }
+    .navbar .position-relative input[placeholder="Search"]:focus {
+        width: 220px;
+    }
+}
+
+/* Promotion Bar */
+.promotion-bar {
+    border-bottom: 1px solid #E5E5E5;
+    font-size: 0.875rem;
+    padding: 0.25rem 0 !important;
+    display: flex;
+    align-items: center;
+    transform: translateY(-10px); /* Chuyển động lên */
+    animation: slideIn 0.5s ease-in-out forwards;
+}
+
+.promotion-bar a {
+    color: #000;
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+}
+
+.promotion-bar a:hover {
+    opacity: 0.6;
+}
+
+/* Gentle card hover lift + shadow for common blocks */
+.feature-card,
+.deal-card {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.feature-card:hover,
+.deal-card:hover {
+    transform: translateY(-4px); /* Nâng card lên */
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    border-color: #000;
+}
+
+/* Buttons subtle float on hover */
+.btn,
+.btn-dark,
+.btn-outline-dark {
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.btn:hover,
+.btn-dark:hover,
+.btn-outline-dark:hover {
+    transform: translateY(-2px); /* Nâng nút khi hover */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Hero Section */
+.hero-section {
+    margin: 0;
+}
+
+.hero-banner {
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.hero-section .btn-dark {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.hero-section .btn-dark:hover {
+    background: #333 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hero-section .btn-outline-dark {
+    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.hero-section .btn-outline-dark:hover {
+    background: #000 !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Feature Section */
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 3rem;
+    letter-spacing: -0.03em;
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0 !important;
+    border: 1px solid #E5E5E5 !important;
+    overflow: hidden;
+    background: white;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px); /* Nâng lên khi hover */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    border-color: #000 !important;
+}
+
+/* Footer Styles */
+.footer-section {
+    background-color: #000 !important;
+    border-top: none;
+}
+
+.footer-section h5,
+.footer-section h6 {
+    color: white;
+    font-weight: 600;
+}
+
+.footer-section p {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-section a {
+    transition: color 0.3s ease;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-section a:hover {
+    color: #8C8C8C !important;
+}
+
+/* Container adjustments */
+.container-fluid {
+    max-width: 1440px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+@media (max-width: 1200px) {
+    .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 600;
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    line-height: 1;
+}
+
+.bg-danger {
+    background-color: #EF0027 !important;
+}
+
+/* Button styles */
+.btn-outline-dark {
+    color: #000;
+    border-color: #000;
+    font-weight: 500;
+}
+
+.btn-outline-dark:hover {
+    background-color: #000;
+    color: white;
+    border-color: #000;
+}
+
+/* Slide-in animation for promotion bar */
+@keyframes slideIn {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}

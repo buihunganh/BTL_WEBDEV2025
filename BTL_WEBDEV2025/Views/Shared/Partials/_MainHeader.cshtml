@@ -1,0 +1,61 @@
+<!-- Main Header Navigation - Nike style -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container-fluid">
+        <!-- Mobile menu button -->
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Logo - Left side -->
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #000; font-size: 1.6rem; font-weight: 700; letter-spacing: 0; text-decoration: none;">
+            NIKE
+        </a>
+        
+        <!-- Right side: Search, Wishlist, Cart -->
+        <div class="d-none d-lg-flex align-items-center" style="gap: 1rem;">
+            <div class="position-relative">
+                <input type="text" placeholder="Search" style="width: 150px; border: none; border-bottom: 1px solid #ccc; border-radius: 0; font-size: 0.875rem; color: #000; background: transparent; padding: 5px 25px 5px 0; outline: none;" onfocus="this.style.borderBottomColor='#000'" onblur="this.style.borderBottomColor='#ccc'" />
+                <i class="bi bi-search position-absolute" style="right: 5px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8C8C8C;"></i>
+            </div>
+            <a href="#" class="text-decoration-none nav-icon" style="color: #000; font-size: 1.3rem;">
+                <i class="bi bi-heart"></i>
+            </a>
+            <a asp-controller="Cart" asp-action="Index" class="text-decoration-none position-relative nav-icon" style="color: #000; font-size: 1.3rem;">
+                <i class="bi bi-bag"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 2px 5px;">0</span>
+            </a>
+        </div>
+        
+        <!-- Navigation links - Center -->
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mx-auto d-flex align-items-center gap-3">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="features" style="font-weight: 400; font-size: 0.95rem; color: #000;">New & Featured</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Products" asp-action="Men" style="font-weight: 400; font-size: 0.95rem; color: #000;">Men</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Products" asp-action="Women" style="font-weight: 400; font-size: 0.95rem; color: #000;">Women</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Products" asp-action="Kid" style="font-weight: 400; font-size: 0.95rem; color: #000;">Kids</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Products" asp-action="Sale" style="font-weight: 400; font-size: 0.95rem; color: #000;">Sale</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Promotion Bar -->
+<div class="promotion-bar bg-white border-bottom" style="border-color: #E5E5E5;">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3" style="min-height: 32px;">
+            <span style="font-size: 0.875rem; color: #111;">Free Standard Delivery & 30-Day Free Returns</span>
+            <a href="#" style="font-size: 0.875rem; color: #111; text-decoration: underline;">Join Now</a>
+            <a href="#" style="font-size: 0.875rem; color:市区 text-decoration: underline;">View Details</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+using BTL_WEBDEV2025.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BTL_WEBDEV2025.Controllers
+{
+    public class ProductsController : Controller
+    {
+        private readonly ILogger<ProductsController> _logger;
+        private readonly List<Product> _products;
+
+        public ProductsController(ILogger<ProductsController> logger)
+        {
+            _logger = logger;
+            _products = InitializeProducts();
+        }
+
+        // GET: Products
+        public IActionResult Index()
+        {
+            return View(_products);
+        }
+
+        // GET: Products/Details/5
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = _products.FirstOrDefault(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+        // GET: Products/Men
+        public IActionResult Men()
+        {
+            var menProducts = _products.Where(p => p.Category == "Men" || p.Category == "Unisex").ToList();
+            return View(menProducts);
+        }
+
+        // GET: Products/Women
+        public IActionResult Women()
+        {
+            var womenProducts = _products.Where(p => p.Category == "Women" || p.Category == "Unisex").ToList();
+            return View(womenProducts);
+        }
+
+        // GET: Products/Kid
+        public IActionResult Kid()
+        {
+            return View(_products.Where(p => p.Category == "Kid").ToList());
+        }
+
+        // GET: Products/Sale
+        public IActionResult Sale()
+        {
+            var saleProducts = _products.Where(p => p.DiscountPrice.HasValue).ToList();
+            return View(saleProducts);
+        }
+
+        // AJAX endpoint for filtering
+        [HttpGet]
+        public IActionResult Filter(string category)
+        {
+            var filteredProducts = string.IsNullOrEmpty(category) 
+                ? _products 
+                : _products.Where(p => p.Category == category).ToList();
+            
+            return Json(filteredProducts);
+        }
+
+        private List<Product> InitializeProducts()
+        {
+            return new List<Product>
+            {
+                new Product { Id = 1, Name = "Air Max 270", Description = "Premium running shoes with Air Max technology", Price = 150, ImageUrl = "https://via.placeholder.com/300", Category = "Men", IsFeatured = true },
+                new Product { Id = 2, Name = "Air Force 1", Description = "Classic lifestyle shoes", Price = 90, DiscountPrice = 70, ImageUrl = "https://via.placeholder.com/300", Category = "Unisex", IsFeatured = true, IsSpecialDeal = true },
+                new Product { Id = 3, Name = "Zoom Pegasus", Description = "High-performance running shoes", Price = 120, ImageUrl = "https://via.placeholder.com/300", Category = "Men", IsFeatured = true },
+                new Product { Id = 4, Name = "Revolution 6", Description = "Everyday running for women", Price = 60, ImageUrl = "https://via.placeholder.com/300", Category = "Women", IsFeatured = true },
+                new Product { Id = 5, Name = "Court Vision", Description = "Basketball lifestyle shoes", Price = 65, DiscountPrice = 45, ImageUrl = "https://via.placeholder.com/300", Category = "Men", IsSpecialDeal = true },
+                new Product { Id = 6, Name = "React Element", Description = "Futuristic design sneakers", Price = 130, ImageUrl = "https://via.placeholder.com/300", Category = "Unisex", IsFeatured = true },
+                new Product { Id = 7, Name = "Free RN", Description = "Natural motion running shoes", Price = 80, DiscountPrice = 60, ImageUrl = "https://via.placeholder.com/300", Category = "Women", IsSpecialDeal = true },
+                new Product { Id = 8, Name = "Dunk Low", Description = "Skateboarding classic", Price = 100, ImageUrl = "https://via.placeholder.com/300", Category = "Unisex", IsFeatured = true },
+                new Product { Id = 9, Name = "Kids Air Max", Description = "Comfortable running for kids", Price = 70, ImageUrl = "https://via.placeholder.com/300", Category = "Kid", IsFeatured = false },
+                new Product { Id = 10, Name = "Kids Basketball", Description = "Basketball shoes for young athletes", Price = 50, DiscountPrice = 35, ImageUrl = "https://via.placeholder.com/300", Category = "Kid", IsSpecialDeal = true }
+            };
+        }
+    }
+}
+
