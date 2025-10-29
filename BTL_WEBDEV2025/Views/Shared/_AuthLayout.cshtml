@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ABDD</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Now Text", Helvetica, Arial, sans-serif;
+            background: #fff;
+            color: #000;
+            line-height: 1.6;
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-logo a{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .auth-logo img{
+            height: 28px; /* match text cap-height */
+            width: auto;
+            object-fit: contain;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .auth-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 32px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .auth-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .change-link {
+            color: #000;
+            text-decoration: underline;
+            font-size: 14px;
+            transition: opacity 0.2s ease;
+        }
+
+        .change-link:hover {
+            opacity: 0.7;
+        }
+
+        .auth-form {
+            text-align: left;
+            margin-top: 32px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-field {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            color: #000;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .form-input.error {
+            border-color: #EF0027;
+        }
+
+        /* ASP.NET unobtrusive validation error styles */
+        input.input-validation-error,
+        select.input-validation-error {
+            border-color: #EF0027;
+            box-shadow: 0 0 0 2px rgba(239,0,39,0.08);
+        }
+
+        .agreement-checkbox.input-validation-error {
+            outline: 2px solid #EF0027;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8C8C8C;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #000;
+        }
+
+        .password-strength {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .strength-bar {
+            height: 3px;
+            background: #E5E5E5;
+            border-radius: 2px;
+            flex: 1;
+            transition: background-color 0.3s ease;
+        }
+
+        .strength-bar.active {
+            background: #000;
+        }
+
+        .select-container {
+            position: relative;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8C8C8C;
+            pointer-events: none;
+        }
+
+        .dob-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap; /* allow wrap on very small screens */
+        }
+
+        .dob-input {
+            padding: 10px 12px;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        /* compact widths for DD/MM/YYYY */
+        .dob-input.dob-day,
+        .dob-input.dob-month {
+            flex: 0 0 72px;
+            max-width: 72px;
+        }
+
+        .dob-input.dob-year {
+            flex: 0 0 110px;
+            max-width: 110px;
+        }
+
+        .dob-input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .agreement-field {
+            margin: 32px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .agreement-checkbox {
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .agreement-label {
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .policy-link {
+            color: #000;
+            text-decoration: underline;
+            transition: opacity 0.2s ease;
+        }
+
+        .policy-link:hover {
+            opacity: 0.7;
+        }
+
+        .auth-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .auth-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .auth-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-text {
+            color: #EF0027;
+            font-size: 12px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .location-section {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .country-text {
+            color: #333;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,35 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-page">
+    <div class="auth-container">
+        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
+        <h2 class="auth-title">Enter your email to join us or sign in</h2>
+        
+        <div class="location-section">
+            <span class="country-text">@Model.Country</span>
+            <a href="#" class="change-link">Change</a>
+        </div>
+
+        <form asp-action="Login" method="post" novalidate class="auth-form">
+            <div class="form-field">
+                <label asp-for="Email" class="form-label">Email*</label>
+                <input asp-for="Email" class="form-input" />
+                <span asp-validation-for="Email" class="error-text">Require</span>
+            </div>
+
+            <p class="auth-subtitle" style="margin-bottom: 32px; text-align: left;">
+                By continuing, I agree to our shop's <a href="#" class="policy-link"><strong>Privacy Policy</strong></a> and <a href="#" class="policy-link"><strong>Terms of Use</strong></a>.
+            </p>
+
+            <button type="submit" class="auth-btn">Continue</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

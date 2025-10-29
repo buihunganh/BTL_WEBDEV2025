@@ -1,0 +1,189 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-page">
+    <div class="auth-container">
+        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
+        <h2 class="auth-title">Now let's make you a ABDD Member.</h2>
+        @if (!string.IsNullOrWhiteSpace(Model?.Email))
+        {
+            <div style="font-size: 14px; color: #333; margin-bottom: 8px;">Email: <strong>@Model.Email</strong></div>
+        }
+        <a href="#" class="change-link" id="changeEmailLink">Change my email</a>
+
+        <form asp-action="Register" method="post" novalidate class="auth-form">
+            <input type="hidden" asp-for="Email" />
+            <div class="form-row">
+                <div class="form-field">
+                    <label asp-for="FirstName" class="form-label">First name*</label>
+                    <input asp-for="FirstName" class="form-input" />
+                    <span asp-validation-for="FirstName" class="error-text"></span>
+                </div>
+                <div class="form-field">
+                    <label asp-for="LastName" class="form-label">Last name*</label>
+                    <input asp-for="LastName" class="form-input" />
+                    <span asp-validation-for="LastName" class="error-text"></span>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="Password" class="form-label">Password*</label>
+                <div class="password-container">
+                    <input asp-for="Password" class="form-input" id="regPassword" />
+                    <i class="bi bi-eye password-toggle" id="togglePwd"></i>
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                    <div class="strength-bar"></div>
+                    <div class="strength-bar"></div>
+                </div>
+                <span asp-validation-for="Password" class="error-text"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="Preference" class="form-label">Shopping preference*</label>
+                <div class="select-container">
+                    <select asp-for="Preference" class="form-select">
+                        <option value="">Select...</option>
+                        <option>Men</option>
+                        <option>Women</option>
+                        <option>Kids</option>
+                    </select>
+                    <i class="bi bi-chevron-down select-arrow"></i>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label">Date of Birth</label>
+                <div class="dob-row">
+                    <input asp-for="BirthDay" class="dob-input dob-day" placeholder="DD" />
+                    <input asp-for="BirthMonth" class="dob-input dob-month" placeholder="MM" />
+                    <input asp-for="BirthYear" class="dob-input dob-year" placeholder="YYYY" />
+                </div>
+                <span class="error-text" id="dobError"></span>
+            </div>
+
+            <div class="agreement-field">
+                <input asp-for="AcceptPolicy" class="agreement-checkbox" id="agree" />
+                <label class="agreement-label" for="agree">
+                    I agree to ABDD's <a href="#" class="policy-link">Privacy Policy</a> and <a href="#" class="policy-link">Term of Use</a>
+                </label>
+                <span asp-validation-for="AcceptPolicy" class="error-text"></span>
+            </div>
+
+            <button type="submit" class="auth-btn">Create account</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script>
+        document.getElementById('togglePwd')?.addEventListener('click', function(){
+            const input = document.getElementById('regPassword');
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+
+        // navigate back to Login to change email
+        document.getElementById('changeEmailLink')?.addEventListener('click', function(e){
+            e.preventDefault();
+            window.location.href = '@Url.Action("Login", "Account")';
+        });
+
+        // password strength indicator
+        (function(){
+            const pwd = document.getElementById('regPassword');
+            if(!pwd) return;
+            const bars = Array.from(document.querySelectorAll('.password-strength .strength-bar'));
+            const calcScore = (value) => {
+                let score = 0;
+                if (value.length >= 8) score++;
+                if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score++;
+                if (/[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value)) score++;
+                return Math.min(score, 3);
+            };
+            const render = (score) => {
+                bars.forEach((b, i) => {
+                    if (i < score) b.classList.add('active'); else b.classList.remove('active');
+                });
+            };
+            render(0);
+            pwd.addEventListener('input', () => render(calcScore(pwd.value)));
+        })();
+
+        // client constraints for DOB fields
+        (function(){
+            const day = document.querySelector('input[name="BirthDay"]');
+            const month = document.querySelector('input[name="BirthMonth"]');
+            const year = document.querySelector('input[name="BirthYear"]');
+            const dobError = document.getElementById('dobError');
+            const form = document.querySelector('form.auth-form');
+
+            if(!day || !month || !year || !form) return;
+
+            const onlyDigits = (el, maxLen) => {
+                el.addEventListener('input', () => {
+                    el.value = el.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                });
+            };
+            onlyDigits(day, 2); onlyDigits(month, 2); onlyDigits(year, 4);
+
+            // auto-tab forward
+            day.addEventListener('input', () => { if(day.value.length === 2) month.focus(); });
+            month.addEventListener('input', () => { if(month.value.length === 2) year.focus(); });
+
+            // clamp month/day within range while typing
+            const clamp = (el, min, max) => {
+                el.addEventListener('blur', () => {
+                    if(!el.value) return;
+                    let n = parseInt(el.value, 10);
+                    if (isNaN(n)) { el.value = ''; return; }
+                    if (n < min) n = min;
+                    if (n > max) n = max;
+                    // fix 00 -> 01
+                    if (max >= 12 && n === 0) n = 1;
+                    el.value = String(n).padStart(el === year ? 4 : 2, '0');
+                });
+            };
+            clamp(month, 1, 12);
+            clamp(day, 1, 31);
+
+            function validateDob(){
+                dobError.textContent = '';
+                if(!day.value && !month.value && !year.value) return true; // optional
+                const d = parseInt(day.value, 10), m = parseInt(month.value, 10), y = parseInt(year.value, 10);
+                if(!(d>=1 && d<=31) || !(m>=1 && m<=12) || !(y>=1900 && y<=2100)){
+                    dobError.textContent = 'Please enter a valid date (DD/MM/YYYY).';
+                    return false;
+                }
+                const dt = new Date(y, m-1, d);
+                const ok = dt.getFullYear() === y && dt.getMonth() === m-1 && dt.getDate() === d;
+                if(!ok){
+                    dobError.textContent = 'Please enter a valid date (DD/MM/YYYY).';
+                    return false;
+                }
+
+                // age >= 13
+                const today = new Date();
+                let age = today.getFullYear() - y;
+                const hasNotHadBirthday = (today.getMonth() + 1 < m) || ((today.getMonth() + 1 === m) && today.getDate() < d);
+                if (hasNotHadBirthday) age--;
+                if (age < 13) {
+                    dobError.textContent = 'You must be at least 13 years old.';
+                    return false;
+                }
+                return true;
+            }
+
+            form.addEventListener('submit', (e) => {
+                if(!validateDob()){
+                    e.preventDefault();
+                }
+            });
+        })();
+    </script>
+}

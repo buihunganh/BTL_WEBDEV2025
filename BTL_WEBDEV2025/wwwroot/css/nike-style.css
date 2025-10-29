@@ -758,3 +758,7 @@ html { scroll-behavior: smooth; }
 
 /* Remove bottom gap on men page */
 .men-page { padding-bottom: 0 !important; margin-bottom: 0 !important; }
+
+/* Auth pages - minimalist form styling consistent with tone */
+.auth .form-control { border-radius: 10px; }
+.auth .btn-dark { padding-left: 20px; padding-right: 20px; }
