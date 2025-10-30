@@ -1,23 +1,27 @@
 using BTL_WEBDEV2025.Models;
 using Microsoft.AspNetCore.Mvc;
+using BTL_WEBDEV2025.Data;
 
 namespace BTL_WEBDEV2025.Controllers
 {
     public class ProductsController : Controller
     {
         private readonly ILogger<ProductsController> _logger;
-        private readonly List<Product> _products;
+        private readonly AppDbContext _db;
+        private readonly List<Product> _fallbackProducts;
 
-        public ProductsController(ILogger<ProductsController> logger)
+        public ProductsController(ILogger<ProductsController> logger, AppDbContext db)
         {
             _logger = logger;
-            _products = InitializeProducts();
+            _db = db;
+            _fallbackProducts = InitializeProducts();
         }
 
         // GET: Products
         public IActionResult Index()
         {
-            return View(_products);
+            var all = TryGetProductsFromDb();
+            return View(all);
         }
 
         // GET: Products/Details/5
@@ -28,7 +32,7 @@ namespace BTL_WEBDEV2025.Controllers
                 return NotFound();
             }
 
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = TryGetProductsFromDb().FirstOrDefault(p => p.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -40,27 +44,27 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Products/Men
         public IActionResult Men()
         {
-            var menProducts = _products.Where(p => p.Category == "Men" || p.Category == "Unisex").ToList();
+            var menProducts = TryGetProductsFromDb().Where(p => p.Category == "Men" || p.Category == "Unisex").ToList();
             return View(menProducts);
         }
 
         // GET: Products/Women
         public IActionResult Women()
         {
-            var womenProducts = _products.Where(p => p.Category == "Women" || p.Category == "Unisex").ToList();
+            var womenProducts = TryGetProductsFromDb().Where(p => p.Category == "Women" || p.Category == "Unisex").ToList();
             return View(womenProducts);
         }
 
         // GET: Products/Kid
         public IActionResult Kid()
         {
-            return View(_products.Where(p => p.Category == "Kid").ToList());
+            return View(TryGetProductsFromDb().Where(p => p.Category == "Kid").ToList());
         }
 
         // GET: Products/Sale
         public IActionResult Sale()
         {
-            var saleProducts = _products.Where(p => p.DiscountPrice.HasValue).ToList();
+            var saleProducts = TryGetProductsFromDb().Where(p => p.DiscountPrice.HasValue).ToList();
             return View(saleProducts);
         }
 
@@ -68,9 +72,10 @@ namespace BTL_WEBDEV2025.Controllers
         [HttpGet]
         public IActionResult Filter(string category)
         {
+            var all = TryGetProductsFromDb();
             var filteredProducts = string.IsNullOrEmpty(category) 
-                ? _products 
-                : _products.Where(p => p.Category == category).ToList();
+                ? all 
+                : all.Where(p => p.Category == category).ToList();
             
             return Json(filteredProducts);
         }
@@ -90,6 +95,23 @@ namespace BTL_WEBDEV2025.Controllers
                 new Product { Id = 9, Name = "Kids Air Max", Description = "Comfortable running for kids", Price = 70, ImageUrl = "https://via.placeholder.com/300", Category = "Kid", IsFeatured = false },
                 new Product { Id = 10, Name = "Kids Basketball", Description = "Basketball shoes for young athletes", Price = 50, DiscountPrice = 35, ImageUrl = "https://via.placeholder.com/300", Category = "Kid", IsSpecialDeal = true }
             };
+        }
+
+        private List<Product> TryGetProductsFromDb()
+        {
+            try
+            {
+                if (_db.Database.CanConnect())
+                {
+                    var list = _db.Products.ToList();
+                    if (list.Count > 0) return list;
+                }
+            }
+            catch
+            {
+                // ignore and fallback
+            }
+            return _fallbackProducts;
         }
     }
 }

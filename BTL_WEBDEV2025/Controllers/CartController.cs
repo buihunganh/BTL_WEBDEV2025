@@ -17,6 +17,13 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Cart
         public IActionResult Index()
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                ViewBag.RequireLogin = true;
+                return View(new List<ShoppingCartItem>());
+            }
+
             var cartItems = GetCartItems();
             return View(cartItems);
         }

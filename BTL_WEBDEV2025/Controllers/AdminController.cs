@@ -1,17 +1,19 @@
 using BTL_WEBDEV2025.Models;
+using BTL_WEBDEV2025.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BTL_WEBDEV2025.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ILogger<AdminController> _logger;
-        private List<Product> _products = new();
+        private readonly AppDbContext _db;
 
-        public AdminController(ILogger<AdminController> logger)
+        public AdminController(ILogger<AdminController> logger, AppDbContext db)
         {
             _logger = logger;
-            _products = InitializeProducts();
+            _db = db;
         }
 
         // GET: Admin
@@ -23,7 +25,12 @@ namespace BTL_WEBDEV2025.Controllers
                 return RedirectToAction("Login");
             }
             
-            return View(_products);
+            // Get products from database (use navigation properties)
+            var products = _db.Products
+                .Include(p => p.CategoryRef)
+                .Include(p => p.Brand)
+                .ToList();
+            return View(products);
         }
 
         // GET: Admin/Login
@@ -52,7 +59,8 @@ namespace BTL_WEBDEV2025.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("IsAdmin");
-            return RedirectToAction("Login");
+            // Always return to unified Account login page
+            return RedirectToAction("Login", "Account");
         }
 
         // GET: Admin/Create
@@ -78,9 +86,9 @@ namespace BTL_WEBDEV2025.Controllers
 
             if (ModelState.IsValid)
             {
-                // Save to database (demo)
-                product.Id = _products.Count + 1;
-                _products.Add(product);
+                // Save to database
+                _db.Products.Add(product);
+                _db.SaveChanges();
                 
                 TempData["Success"] = "Product created successfully";
                 return RedirectToAction("Index");
@@ -102,7 +110,7 @@ namespace BTL_WEBDEV2025.Controllers
                 return NotFound();
             }
 
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = _db.Products.FirstOrDefault(p => p.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -128,7 +136,7 @@ namespace BTL_WEBDEV2025.Controllers
 
             if (ModelState.IsValid)
             {
-                var existingProduct = _products.FirstOrDefault(p => p.Id == id);
+                var existingProduct = _db.Products.FirstOrDefault(p => p.Id == id);
                 if (existingProduct != null)
                 {
                     existingProduct.Name = product.Name;
@@ -136,7 +144,8 @@ namespace BTL_WEBDEV2025.Controllers
                     existingProduct.Price = product.Price;
                     existingProduct.DiscountPrice = product.DiscountPrice;
                     existingProduct.ImageUrl = product.ImageUrl;
-                    existingProduct.Category = product.Category;
+                    existingProduct.CategoryId = product.CategoryId;
+                    _db.SaveChanges();
                 }
                 
                 TempData["Success"] = "Product updated successfully";
@@ -156,10 +165,11 @@ namespace BTL_WEBDEV2025.Controllers
                 return RedirectToAction("Login");
             }
 
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = _db.Products.FirstOrDefault(p => p.Id == id);
             if (product != null)
             {
-                _products.Remove(product);
+                _db.Products.Remove(product);
+                _db.SaveChanges();
                 TempData["Success"] = "Product deleted successfully";
             }
             
@@ -168,17 +178,24 @@ namespace BTL_WEBDEV2025.Controllers
 
         private bool IsAdmin()
         {
-            return HttpContext.Session.GetString("IsAdmin") == "true";
-        }
-
-        private List<Product> InitializeProducts()
-        {
-            return new List<Product>
+            // Check session IsAdmin flag (for Admin/Login route)
+            if (HttpContext.Session.GetString("IsAdmin") == "true")
             {
-                new Product { Id = 1, Name = "Air Max 270", Description = "Premium running shoes", Price = 150, ImageUrl = "https://via.placeholder.com/300", Category = "Men", IsFeatured = true },
-                new Product { Id = 2, Name = "Air Force 1", Description = "Classic lifestyle shoes", Price = 90, DiscountPrice = 70, ImageUrl = "https://via.placeholder.com/300", Category = "Unisex", IsFeatured = true, IsSpecialDeal = true },
-                new Product { Id = 3, Name = "Zoom Pegasus", Description = "High-performance running", Price = 120, ImageUrl = "https://via.placeholder.com/300", Category = "Men", IsFeatured = true }
-            };
+                return true;
+            }
+            
+            // Check UserId and RoleId from Account login
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId.HasValue)
+            {
+                var user = _db.Users.FirstOrDefault(u => u.Id == userId.Value);
+                if (user != null && user.RoleId == 1) // RoleId 1 = Admin
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
     }
 }

@@ -2,18 +2,21 @@ using System.Diagnostics;
 using BTL_WEBDEV2025.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using BTL_WEBDEV2025.Data;
 
 namespace BTL_WEBDEV2025.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly List<Product> _products;
+        private readonly AppDbContext _db;
+        private readonly List<Product> _fallbackProducts;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDbContext db)
         {
             _logger = logger;
-            _products = InitializeProducts();
+            _db = db;
+            _fallbackProducts = InitializeProducts();
         }
 
         public IActionResult Index()
@@ -30,7 +33,8 @@ namespace BTL_WEBDEV2025.Controllers
         [HttpGet]
         public IActionResult GetProducts()
         {
-            return Json(_products);
+            var products = TryGetProductsFromDb();
+            return Json(products);
         }
 
         // AJAX endpoint for search functionality
@@ -42,7 +46,8 @@ namespace BTL_WEBDEV2025.Controllers
                 return Json(new { products = new List<Product>() });
             }
 
-            var results = _products.Where(p => 
+            var all = TryGetProductsFromDb();
+            var results = all.Where(p => 
                 p.Name.Contains(request.Query, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(request.Query, StringComparison.OrdinalIgnoreCase)
             ).ToList();
@@ -54,7 +59,7 @@ namespace BTL_WEBDEV2025.Controllers
         [HttpGet]
         public IActionResult GetFeaturedProducts()
         {
-            var featuredProducts = _products.Where(p => p.IsFeatured).ToList();
+            var featuredProducts = TryGetProductsFromDb().Where(p => p.IsFeatured).ToList();
             return Json(featuredProducts);
         }
 
@@ -62,7 +67,7 @@ namespace BTL_WEBDEV2025.Controllers
         [HttpGet]
         public IActionResult GetSpecialDeals()
         {
-            var specialDeals = _products.Where(p => p.IsSpecialDeal).ToList();
+            var specialDeals = TryGetProductsFromDb().Where(p => p.IsSpecialDeal).ToList();
             return Json(specialDeals);
         }
 
@@ -85,6 +90,23 @@ namespace BTL_WEBDEV2025.Controllers
                 new Product { Id = 7, Name = "Free RN", Description = "Natural motion", Price = 80, DiscountPrice = 60, ImageUrl = "https://via.placeholder.com/300", Category = "Women", IsSpecialDeal = true },
                 new Product { Id = 8, Name = "Dunk Low", Description = "Skateboarding classic", Price = 100, ImageUrl = "https://via.placeholder.com/300", Category = "Unisex", IsFeatured = true }
             };
+        }
+
+        private List<Product> TryGetProductsFromDb()
+        {
+            try
+            {
+                if (_db.Database.CanConnect())
+                {
+                    var list = _db.Products.ToList();
+                    if (list.Count > 0) return list;
+                }
+            }
+            catch
+            {
+                // ignore and fallback
+            }
+            return _fallbackProducts;
         }
     }
 

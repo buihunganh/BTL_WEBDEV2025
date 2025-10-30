@@ -6,30 +6,401 @@
 
 <div class="auth-page">
     <div class="auth-container">
-        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
-        <h2 class="auth-title">Enter your email to join us or sign in</h2>
-        
-        <div class="location-section">
-            <span class="country-text">@Model.Country</span>
-            <a href="#" class="change-link">Change</a>
-        </div>
-
-        <form asp-action="Login" method="post" novalidate class="auth-form">
-            <div class="form-field">
-                <label asp-for="Email" class="form-label">Email*</label>
-                <input asp-for="Email" class="form-input" />
-                <span asp-validation-for="Email" class="error-text">Require</span>
+        @if (Context.Request.Query.ContainsKey("success"))
+        {
+            <div id="serverSuccessBanner" style="background:#e6ffed; color:#03543f; border:1px solid #84e1bc; padding:12px 16px; border-radius:8px; margin-bottom:16px; text-align:left;">
+                <strong>Success!</strong> @Context.Request.Query["msg"].ToString()
             </div>
+            <script>
+                setTimeout(function(){
+                    var el = document.getElementById('serverSuccessBanner');
+                    if (el) el.remove();
+                }, 3500);
+            </script>
+        }
+        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
+        <h2 class="auth-title">
+            @if (Model?.IsNewUser ?? false)
+            {
+                @:Now let's make you a ABDD Member.
+                <div style="margin-top:8px;"><a href="@Url.Action("Login","Account")" class="change-link">Change my email</a></div>
+            }
+            else if (Model?.ShowPassword ?? false)
+            {
+                @:Enter your password
+            }
+            else
+            {
+                @:Enter your email to join us or sign in
+            }
+        </h2>
+        
+        @if (!(Model?.IsNewUser ?? false))
+        {
+            <div class="location-section">
+                <span class="country-text">@(Model?.Country ?? "Vietnam")</span>
+                <a href="#" class="change-link">Change</a>
+            </div>
+        }
 
-            <p class="auth-subtitle" style="margin-bottom: 32px; text-align: left;">
-                By continuing, I agree to our shop's <a href="#" class="policy-link"><strong>Privacy Policy</strong></a> and <a href="#" class="policy-link"><strong>Terms of Use</strong></a>.
-            </p>
+        <form asp-action="Login" method="post" class="auth-form needs-validation" id="loginForm" novalidate>
+            @if (Model?.ShowPassword ?? false)
+            {
+                <input type="hidden" name="ShowPassword" value="true" />
+                <input type="hidden" name="IsNewUser" value="@((Model?.IsNewUser ?? false) ? "true" : "false")" />
+            }
+            @Html.ValidationSummary(false, "", new { @class = "error-text", style = "margin-bottom:12px;" })
+            @if (!(Model?.ShowPassword ?? false))
+            {
+                <div class="form-field mb-3">
+                    <label asp-for="Email" class="form-label">Email*</label>
+                    <input asp-for="Email" class="form-input form-control" type="email" required />
+                    <span asp-validation-for="Email" class="error-text"></span>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" asp-for="Email" />
+                <div class="form-field mb-3" style="margin-bottom: 16px;">
+                    <label class="form-label" style="color: #666; font-weight: 400;">Email</label>
+                    <div class="form-control bg-light" style="padding: 12px 16px; border: 1px solid #E5E5E5; border-radius: 8px; color: #333;">
+                        @Model?.Email
+                    </div>
+                </div>
+            }
 
-            <button type="submit" class="auth-btn">Continue</button>
+            @if (Model?.ShowPassword ?? false)
+            {
+                <div class="form-field mb-3">
+                    <label class="form-label">Password*</label>
+                    <div class="password-container">
+                        @if (Model?.IsNewUser ?? false)
+                        {
+                            <input asp-for="Password" type="password" class="form-input form-control" placeholder="Enter password" id="registerPassword" />
+                        }
+                        else
+                        {
+                            <!-- Existing user login: plain input to avoid client regex constraints -->
+                            <input name="Password" type="password" class="form-input form-control" placeholder="Enter your password" />
+                        }
+                        <i class="bi bi-eye password-toggle" onclick="togglePassword(this)"></i>
+                    </div>
+                    @if (Model?.IsNewUser ?? false)
+                    {
+                        <div class="password-strength" id="passwordStrength" style="display: none;">
+                            <div class="strength-bar"></div>
+                            <div class="strength-bar"></div>
+                            <div class="strength-bar"></div>
+                            <div class="strength-bar"></div>
+                        </div>
+                        <div id="passwordRequirements" style="font-size: 12px; color: #666; margin-top: 4px; display: none;">
+                            <div id="req-length">✓ At least 6 characters</div>
+                            <div id="req-upper">✓ One uppercase letter</div>
+                            <div id="req-lower">✓ One lowercase letter</div>
+                            <div id="req-number">✓ One number</div>
+                        </div>
+                        <span asp-validation-for="Password" class="error-text"></span>
+                    }
+                </div>
+            }
+
+            @if (Model?.IsNewUser ?? false)
+            {
+                <div class="form-row">
+                <div class="form-field mb-3">
+                        <label asp-for="FirstName" class="form-label">First name*</label>
+                    <input asp-for="FirstName" class="form-input form-control" placeholder="Enter first name" />
+                        <span asp-validation-for="FirstName" class="error-text"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="LastName" class="form-label">Last name*</label>
+                    <input asp-for="LastName" class="form-input form-control" placeholder="Enter last name" />
+                        <span asp-validation-for="LastName" class="error-text"></span>
+                    </div>
+                </div>
+                <div class="form-field mb-3">
+                    <label asp-for="Preference" class="form-label">Shopping preference*</label>
+                    <div class="select-container">
+                        <select asp-for="Preference" class="form-select form-control">
+                            <option value="">Select...</option>
+                            <option value="Men">Men</option>
+                            <option value="Women">Women</option>
+                            <option value="Unisex">Unisex</option>
+                        </select>
+                        <span class="select-arrow">▼</span>
+                    </div>
+                    <span asp-validation-for="Preference" class="error-text"></span>
+                </div>
+                <div class="form-field mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <div class="dob-row">
+                        <input asp-for="BirthDay" type="number" min="1" max="31" class="dob-input dob-day form-control" placeholder="DD" />
+                        <input asp-for="BirthMonth" type="number" min="1" max="12" class="dob-input dob-month form-control" placeholder="MM" />
+                        <input asp-for="BirthYear" type="number" min="1900" max="@DateTime.Now.Year" class="dob-input dob-year form-control" placeholder="YYYY" />
+                    </div>
+                    <span asp-validation-for="BirthDay" class="error-text"></span>
+                </div>
+                <div class="agreement-field">
+                    <input asp-for="AcceptPolicy" type="checkbox" class="agreement-checkbox" id="AcceptPolicy" />
+                    <label for="AcceptPolicy" class="agreement-label">
+                        I agree to ABDD's <a href="#" class="policy-link">Privacy Policy</a> and <a href="#" class="policy-link">Term of Use</a>*
+                    </label>
+                </div>
+                <span asp-validation-for="AcceptPolicy" class="error-text"></span>
+            }
+
+            @if (!(Model?.IsNewUser ?? false) && !(Model?.ShowPassword ?? false))
+            {
+                <p class="auth-subtitle" style="margin-bottom: 32px; text-align: left;">
+                    By continuing, I agree to our shop's <a href="#" class="policy-link"><strong>Privacy Policy</strong></a> and <a href="#" class="policy-link"><strong>Terms of Use</strong></a>.
+                </p>
+            }
+
+            <button type="submit" class="auth-btn btn btn-dark w-100">
+                @if (Model?.IsNewUser ?? false)
+                {
+                    @:Create account
+                }
+                else if (Model?.ShowPassword ?? false)
+                {
+                    @:Sign in
+                }
+                else
+                {
+                    @:Continue
+                }
+            </button>
         </form>
     </div>
 </div>
 
 @section Scripts{
     <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script>
+        function togglePassword(icon) {
+            const input = icon.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Password strength checker
+        document.addEventListener('DOMContentLoaded', function() {
+            var passwordInput = document.getElementById('registerPassword');
+            if (passwordInput) {
+                var strengthDiv = document.getElementById('passwordStrength');
+                var requirementsDiv = document.getElementById('passwordRequirements');
+                var bars = strengthDiv.querySelectorAll('.strength-bar');
+
+                passwordInput.addEventListener('input', function() {
+                    var password = this.value;
+                    if (password.length > 0) {
+                        strengthDiv.style.display = 'flex';
+                        requirementsDiv.style.display = 'block';
+                    } else {
+                        strengthDiv.style.display = 'none';
+                        requirementsDiv.style.display = 'none';
+                        bars.forEach(bar => {
+                            bar.classList.remove('active', 'weak', 'fair', 'good', 'strong');
+                        });
+                        return;
+                    }
+
+                    // Check requirements
+                    var hasLength = password.length >= 6;
+                    var hasUpper = /[A-Z]/.test(password);
+                    var hasLower = /[a-z]/.test(password);
+                    var hasNumber = /\d/.test(password);
+
+                    document.getElementById('req-length').textContent = (hasLength ? '✓' : '✗') + ' At least 6 characters';
+                    document.getElementById('req-length').style.color = hasLength ? '#008000' : '#EF0027';
+                    document.getElementById('req-upper').textContent = (hasUpper ? '✓' : '✗') + ' One uppercase letter';
+                    document.getElementById('req-upper').style.color = hasUpper ? '#008000' : '#EF0027';
+                    document.getElementById('req-lower').textContent = (hasLower ? '✓' : '✗') + ' One lowercase letter';
+                    document.getElementById('req-lower').style.color = hasLower ? '#008000' : '#EF0027';
+                    document.getElementById('req-number').textContent = (hasNumber ? '✓' : '✗') + ' One number';
+                    document.getElementById('req-number').style.color = hasNumber ? '#008000' : '#EF0027';
+
+                    // Calculate strength
+                    var score = 0;
+                    if (hasLength) score++;
+                    if (hasUpper) score++;
+                    if (hasLower) score++;
+                    if (hasNumber) score++;
+                    if (password.length >= 10) score++;
+
+                    bars.forEach((bar, index) => {
+                        bar.classList.remove('active', 'weak', 'fair', 'good', 'strong');
+                        if (index < score) {
+                            bar.classList.add('active');
+                            if (score <= 1) bar.classList.add('weak');
+                            else if (score === 2) bar.classList.add('fair');
+                            else if (score === 3) bar.classList.add('good');
+                            else bar.classList.add('strong');
+                        }
+                    });
+                });
+            }
+
+            // Date of birth validation for new user registration
+            (function(){
+                var dayInput = document.querySelector('input[name="BirthDay"]');
+                var monthInput = document.querySelector('input[name="BirthMonth"]');
+                var yearInput = document.querySelector('input[name="BirthYear"]');
+                var dobErrorSpan = document.querySelector('span[asp-validation-for="BirthDay"]');
+                
+                if (dayInput && monthInput && yearInput && dobErrorSpan) {
+                    function validateDob() {
+                        var day = parseInt(dayInput.value, 10);
+                        var month = parseInt(monthInput.value, 10);
+                        var year = parseInt(yearInput.value, 10);
+                        
+                        // If no date provided, it's optional
+                        if (!day && !month && !year) {
+                            return true;
+                        }
+                        
+                        // All three must be provided if any one is provided
+                        if (!day || !month || !year) {
+                            return false;
+                        }
+                        
+                        // Validate date
+                        if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
+                            return false;
+                        }
+                        
+                        var testDate = new Date(year, month - 1, day);
+                        if (testDate.getFullYear() !== year || testDate.getMonth() !== month - 1 || testDate.getDate() !== day) {
+                            return false;
+                        }
+                        
+                        // Must be over 13 years old (age > 13)
+                        var today = new Date();
+                        var age = today.getFullYear() - year;
+                        var hasNotHadBirthday = (today.getMonth() + 1 < month) || 
+                                                ((today.getMonth() + 1 === month) && today.getDate() < day);
+                        if (hasNotHadBirthday) age--;
+                        
+                        if (age <= 13) {
+                            return false;
+                        }
+                        
+                        return true;
+                    }
+                    
+                    // Validate on form submit
+                    var form = document.getElementById('loginForm');
+                    if (form) {
+                        form.addEventListener('submit', function(e) {
+                            var emailInput = form.querySelector('input[type="email"]');
+                            if (emailInput && emailInput.value.trim() === '') {
+                                e.preventDefault();
+                                return false;
+                            }
+                            
+                            // Validate DOB if it's a new user registration
+                            @if (Model?.IsNewUser ?? false)
+                            {
+                                <text>
+                                if (!validateDob()) {
+                                    e.preventDefault();
+                                    if (dobErrorSpan) {
+                                        dobErrorSpan.textContent = 'You must be over 13 years old.';
+                                        dobErrorSpan.style.display = 'block';
+                                    }
+                                    return false;
+                                }
+                                </text>
+                            }
+                        });
+                    }
+                }
+            })();
+
+        });
+
+        // Define showSuccessPopup function FIRST, before checking TempData
+        function showSuccessPopup(message) {
+            // Remove existing popup if any
+            var existingPopup = document.getElementById('successPopup');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+            
+            var popup = document.createElement('div');
+            popup.id = 'successPopup';
+            popup.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 10000; text-align: center; max-width: 400px;';
+            
+            var closePopup = function() {
+                popup.remove();
+            };
+            
+            var redirectToLogin = function() {
+                popup.remove();
+                window.location.href = '@Url.Action("Login", "Account")';
+            };
+            
+            popup.innerHTML = '<h3 style="margin-bottom: 16px; color: #000;">Success!</h3><p style="margin-bottom: 20px; color: #333;">' + 
+                (message || 'Operation completed successfully') + '</p>' +
+                '<button onclick="document.getElementById(\'successPopup\') && (document.getElementById(\'successPopup\').remove() || window.location.href=\'@Url.Action("Login", "Account")\');" ' +
+                'style="background: #000; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer;">OK</button>';
+            
+            document.body.appendChild(popup);
+
+            // Auto close after 3 seconds
+            setTimeout(function() {
+                if (document.getElementById('successPopup')) {
+                    redirectToLogin();
+                }
+            }, 3000);
+        }
+
+        // Check for success message and show popup - AFTER function is defined
+        @if (TempData["AuthMessage"] != null)
+        {
+            var messageText = TempData["AuthMessage"]?.ToString() ?? "";
+            var jsMessage = messageText.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n");
+            <text>
+            // Immediately execute when script loads
+            (function() {
+                var message = '@Html.Raw(jsMessage)';
+                console.log('🔔 TempData message received:', message);
+                console.log('🔔 showSuccessPopup function exists:', typeof showSuccessPopup);
+                
+                function showPopup() {
+                    if (typeof showSuccessPopup === 'function') {
+                        console.log('🔔 Calling showSuccessPopup with message:', message);
+                        showSuccessPopup(message);
+                    } else {
+                        console.error('❌ showSuccessPopup function not found');
+                        // Fallback: try again after a delay
+                        setTimeout(function() {
+                            if (typeof showSuccessPopup === 'function') {
+                                showSuccessPopup(message);
+                            } else {
+                                alert(message); // Last resort fallback
+                            }
+                        }, 1000);
+                    }
+                }
+                
+                // Wait for DOM ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(showPopup, 300);
+                    });
+                } else {
+                    setTimeout(showPopup, 300);
+                }
+            })();
+            </text>
+        }
+    </script>
 }

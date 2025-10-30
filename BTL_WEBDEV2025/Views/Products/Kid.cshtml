@@ -1,0 +1,466 @@
+﻿@model List<BTL_WEBDEV2025.Models.Product>
+
+@{
+    ViewData["Title"] = "Kid";
+
+    var brands = new[] { "Nike", "Adidas", "Puma", "New Balance", "ASICS", "Reebok", "Balenciaga", "Louboutin" };
+}
+
+
+<div class="container-fluid px-4 my-4 men-page">
+    <h1 class="fw-bold mb-3">Kid</h1>
+    <p class="text-muted mb-4">Trending shoes for kids. Jump by brand.</p>
+
+
+    <!-- Brand quick nav -->
+    <div class="brand-subnav d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-outline-dark btn-sm" href="#all">All</a>
+        @foreach (var b in brands)
+        {
+            <a class="btn btn-outline-dark btn-sm" href="#brand-@b.Replace(" ", "-")">@b</a>
+        }
+    </div>
+
+    <!-- Filter toolbar -->
+    <div class="card border-0 mb-3">
+        <div class="card-body py-3 px-0">
+            <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                    <label for="minPrice" class="form-label small text-muted mb-1">Price from</label>
+                    <input type="number" min="0" step="1" class="form-control" id="minPrice" placeholder="0">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="maxPrice" class="form-label small text-muted mb-1">To</label>
+                    <input type="number" min="0" step="1" class="form-control" id="maxPrice" placeholder="9999">
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-label small text-muted mb-1">Brand</div>
+                    <div class="d-flex flex-wrap gap-2" id="brandChecks">
+                        @foreach (var b in brands)
+                        {
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input brand-check" type="checkbox" id="chk-@b.Replace(" ", "-")" value="@b">
+                                <label class="form-check-label" for="chk-@b.Replace(" ", "-")">@b</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="priceOrder" class="form-label small text-muted mb-1">Sort by price</label>
+                    <select class="form-select" id="priceOrder">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <button id="applyFilters" class="btn btn-dark btn-sm">Apply</button>
+                <button id="resetFilters" class="btn btn-outline-dark btn-sm">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- All products grid -->
+    <section id="all" class="brand-section">
+        <h2 class="brand-heading">All Shoes</h2>
+        <div class="row g-4" id="menGrid">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("AllBrand")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Nike products grid -->
+    <section id="brand-Nike" class="brand-section mt-5">
+        <h2 class="brand-heading">Nike</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Nike")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Adidas products grid -->
+    <section id="brand-Adidas" class="brand-section mt-5">
+        <h2 class="brand-heading">Adidas</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Adidas")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- Balenciaga products grid -->
+    <section id="brand-Balenciaga" class="brand-section mt-5">
+        <h2 class="brand-heading">Balenciaga</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Balenciaga")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- Louboutin products grid -->
+    <section id="brand-Louboutin" class="brand-section mt-5">
+        <h2 class="brand-heading">Louboutin</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Louboutin")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- Puma products grid -->
+    <section id="brand-Puma" class="brand-section mt-5">
+        <h2 class="brand-heading">Puma</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Puma")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- New Balance products grid -->
+    <section id="brand-New-Balance" class="brand-section mt-5">
+        <h2 class="brand-heading">New Balance</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("New Balance")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- ASISC products grid -->
+    <section id="brand-ASICS" class="brand-section mt-5">
+        <h2 class="brand-heading">ASICS</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("ASICS")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+    <!-- Reebook products grid -->
+    <section id="brand-Reebok" class="brand-section mt-5">
+        <h2 class="brand-heading">Reebok</h2>
+
+        <div class="row g-4">
+            @foreach (var product in Model.Where(p => p.Tags.Contains("Reebok")))
+            {
+                <div class="col-6 col-md-4 col-lg-3 product-item"
+                     data-price="@product.Price"
+                     data-brand="@string.Join(",", product.Tags)">
+                    <div class="card h-100 border hover-lift">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="bi bi-image fs-1 text-secondary"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text small text-muted">@product.Description</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
+                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Brand anchors (placeholders; hook up when data has brand field) -->
+    @foreach (var b in brands)
+    {
+        if (b == "Nike" || b == "Adidas" || b == "Balenciaga" || b == "Louboutin"
+        ||
+        b == "Puma" || b == "New Balance" || b == "ASICS" || b == "Reebok")
+        {
+            continue;
+        }
+
+        <section id="brand-@b.Replace(" ", "-")" class="brand-section mt-5">
+            <h2 class="brand-heading">@b</h2>
+            <div class="text-muted mb-3">Updating products for @b.</div>
+        </section>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        (function(){
+            const grid = document.getElementById('menGrid');
+            const items = Array.from(grid.querySelectorAll('.product-item'));
+            const minI = document.getElementById('minPrice');
+            const maxI = document.getElementById('maxPrice');
+            const orderSel = document.getElementById('priceOrder');
+            const applyBtn = document.getElementById('applyFilters');
+            const resetBtn = document.getElementById('resetFilters');
+
+            // compute sticky offset to stick right under the main header
+            function updateStickyOffset(){
+                const topBar = document.querySelector('.top-bar');
+                const nav = document.querySelector('.navbar.sticky-top');
+                const promo = document.querySelector('.promotion-bar');
+                const h = (topBar? topBar.offsetHeight:0) + (nav? nav.offsetHeight:0) + (promo? promo.offsetHeight:0);
+                document.documentElement.style.setProperty('--sticky-offset', h + 'px');
+            }
+            updateStickyOffset();
+            window.addEventListener('resize', updateStickyOffset);
+
+            function getSelectedBrands(){
+                const checks = document.querySelectorAll('.brand-check:checked');
+                return Array.from(checks).map(c => c.value.toLowerCase());
+            }
+
+            function priceInRange(price, minV, maxV){
+                if (!isNaN(minV) && price < minV) return false;
+                if (!isNaN(maxV) && price > maxV) return false;
+                return true;
+            }
+
+            function apply(){
+                const minV = parseFloat(minI.value);
+                const maxV = parseFloat(maxI.value);
+                const selBrands = getSelectedBrands();
+                const useBrand = selBrands.length > 0;
+
+                // filter
+                items.forEach(el => {
+                    const price = parseFloat(el.getAttribute('data-price'));
+                    const brand = (el.getAttribute('data-brand') || '').toLowerCase();
+                    const passPrice = priceInRange(price, minV, maxV);
+                    const passBrand = !useBrand || selBrands.includes(brand);
+                    el.style.display = (passPrice && passBrand) ? '' : 'none';
+                });
+
+                // sort by price
+                const visible = items.filter(el => el.style.display !== 'none');
+                visible.sort((a,b) => {
+                    const pa = parseFloat(a.getAttribute('data-price'));
+                    const pb = parseFloat(b.getAttribute('data-price'));
+                    return orderSel.value === 'asc' ? pa - pb : pb - pa;
+                });
+                visible.forEach(el => grid.appendChild(el));
+            }
+
+            function reset(){
+                minI.value = '';
+                maxI.value = '';
+                document.querySelectorAll('.brand-check').forEach(c => c.checked = false);
+                orderSel.value = 'asc';
+                items.forEach(el => el.style.display = '');
+                // restore original order
+                items.forEach(el => grid.appendChild(el));
+            }
+
+            applyBtn.addEventListener('click', apply);
+            resetBtn.addEventListener('click', reset);
+        })();
+    </script>
+}
+
+

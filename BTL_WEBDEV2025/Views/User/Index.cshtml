@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "User";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2>User Dashboard</h2>
+    <p>Xin chào, @ViewBag.Email</p>
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="btn btn-outline-secondary">Đăng xuất</button>
+    </form>
+</div>
+
+

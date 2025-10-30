@@ -43,7 +43,7 @@
                         <td>@product.Name</td>
                         <td>@product.Description</td>
                         <td>$@product.Price</td>
-                        <td>@product.Category</td>
+                        <td>@(product.CategoryRef?.Name ?? product.Category ?? "N/A")</td>
                         <td>@(product.IsFeatured ? "✓" : "")</td>
                         <td>
                             <a href="@Url.Action("Edit", new { id = product.Id })" class="btn btn-sm btn-outline-primary me-2">Edit</a>

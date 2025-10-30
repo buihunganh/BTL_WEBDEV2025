@@ -14,25 +14,25 @@
         }
         <a href="#" class="change-link" id="changeEmailLink">Change my email</a>
 
-        <form asp-action="Register" method="post" novalidate class="auth-form">
+        <form asp-action="Register" method="post" novalidate class="auth-form needs-validation">
             <input type="hidden" asp-for="Email" />
             <div class="form-row">
-                <div class="form-field">
+                <div class="form-field mb-3">
                     <label asp-for="FirstName" class="form-label">First name*</label>
-                    <input asp-for="FirstName" class="form-input" />
+                    <input asp-for="FirstName" class="form-input form-control" />
                     <span asp-validation-for="FirstName" class="error-text"></span>
                 </div>
                 <div class="form-field">
                     <label asp-for="LastName" class="form-label">Last name*</label>
-                    <input asp-for="LastName" class="form-input" />
+                    <input asp-for="LastName" class="form-input form-control" />
                     <span asp-validation-for="LastName" class="error-text"></span>
                 </div>
             </div>
 
-            <div class="form-field">
+            <div class="form-field mb-3">
                 <label asp-for="Password" class="form-label">Password*</label>
                 <div class="password-container">
-                    <input asp-for="Password" class="form-input" id="regPassword" />
+                    <input asp-for="Password" class="form-input form-control" id="regPassword" />
                     <i class="bi bi-eye password-toggle" id="togglePwd"></i>
                 </div>
                 <div class="password-strength">
@@ -43,10 +43,10 @@
                 <span asp-validation-for="Password" class="error-text"></span>
             </div>
 
-            <div class="form-field">
+            <div class="form-field mb-3">
                 <label asp-for="Preference" class="form-label">Shopping preference*</label>
                 <div class="select-container">
-                    <select asp-for="Preference" class="form-select">
+                    <select asp-for="Preference" class="form-select form-control">
                         <option value="">Select...</option>
                         <option>Men</option>
                         <option>Women</option>
@@ -56,12 +56,12 @@
                 </div>
             </div>
 
-            <div class="form-field">
+            <div class="form-field mb-3">
                 <label class="form-label">Date of Birth</label>
                 <div class="dob-row">
-                    <input asp-for="BirthDay" class="dob-input dob-day" placeholder="DD" />
-                    <input asp-for="BirthMonth" class="dob-input dob-month" placeholder="MM" />
-                    <input asp-for="BirthYear" class="dob-input dob-year" placeholder="YYYY" />
+                    <input asp-for="BirthDay" class="dob-input dob-day form-control" placeholder="DD" />
+                    <input asp-for="BirthMonth" class="dob-input dob-month form-control" placeholder="MM" />
+                    <input asp-for="BirthYear" class="dob-input dob-year form-control" placeholder="YYYY" />
                 </div>
                 <span class="error-text" id="dobError"></span>
             </div>
@@ -74,7 +74,7 @@
                 <span asp-validation-for="AcceptPolicy" class="error-text"></span>
             </div>
 
-            <button type="submit" class="auth-btn">Create account</button>
+            <button type="submit" class="auth-btn btn btn-dark w-100">Create account</button>
         </form>
     </div>
 </div>
@@ -167,13 +167,13 @@
                     return false;
                 }
 
-                // age >= 13
+                // Must be over 13 years old (age must be > 13, not >= 13)
                 const today = new Date();
                 let age = today.getFullYear() - y;
                 const hasNotHadBirthday = (today.getMonth() + 1 < m) || ((today.getMonth() + 1 === m) && today.getDate() < d);
                 if (hasNotHadBirthday) age--;
-                if (age < 13) {
-                    dobError.textContent = 'You must be at least 13 years old.';
+                if (age <= 13) {
+                    dobError.textContent = 'You must be over 13 years old.';
                     return false;
                 }
                 return true;
