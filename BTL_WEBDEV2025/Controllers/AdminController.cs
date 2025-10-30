@@ -9,11 +9,13 @@ namespace BTL_WEBDEV2025.Controllers
     {
         private readonly ILogger<AdminController> _logger;
         private readonly AppDbContext _db;
+        private readonly IWebHostEnvironment _env;
 
-        public AdminController(ILogger<AdminController> logger, AppDbContext db)
+        public AdminController(ILogger<AdminController> logger, AppDbContext db, IWebHostEnvironment env)
         {
             _logger = logger;
             _db = db;
+            _env = env;
         }
 
         // GET: Admin
@@ -173,6 +175,97 @@ namespace BTL_WEBDEV2025.Controllers
                 TempData["Success"] = "Product deleted successfully";
             }
             
+            return RedirectToAction("Index");
+        }
+
+        // GET: Admin/BulkImages
+        public IActionResult BulkImages()
+        {
+            if (!IsAdmin()) return RedirectToAction("Login");
+            return View();
+        }
+
+        // POST: Admin/BulkImages
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkImages(List<IFormFile> files, string? brand, string? category, bool updateOnly = false)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login");
+            if (files == null || files.Count == 0)
+            {
+                TempData["Success"] = "No files selected.";
+                return RedirectToAction("BulkImages");
+            }
+
+            var webRoot = _env.WebRootPath;
+            var safeSegment = !string.IsNullOrWhiteSpace(brand) ? brand.Trim() : (!string.IsNullOrWhiteSpace(category) ? category.Trim() : "uploads");
+            foreach (var c in Path.GetInvalidFileNameChars()) safeSegment = safeSegment.Replace(c, '-');
+            var destDir = Path.Combine(webRoot, "media", "products", safeSegment);
+            Directory.CreateDirectory(destDir);
+
+            int saved = 0, updated = 0, created = 0;
+            foreach (var file in files)
+            {
+                if (file.Length <= 0) continue;
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp") continue;
+
+                var baseName = Path.GetFileNameWithoutExtension(file.FileName);
+                // normalize filename
+                var normalized = new string(baseName.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray());
+                normalized = System.Text.RegularExpressions.Regex.Replace(normalized, "-+", "-").Trim('-');
+                var fileName = normalized + "-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ext;
+                var savePath = Path.Combine(destDir, fileName);
+                using (var stream = System.IO.File.Create(savePath))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                saved++;
+
+                var relUrl = "/media/products/" + safeSegment + "/" + fileName;
+
+                // Try map to product by trailing id pattern "...-123"
+                int? parsedId = null;
+                var m = System.Text.RegularExpressions.Regex.Match(normalized, @"-(\d+)$");
+                if (m.Success && int.TryParse(m.Groups[1].Value, out var idVal)) parsedId = idVal;
+
+                Product? product = null;
+                if (parsedId.HasValue)
+                {
+                    product = _db.Products.FirstOrDefault(p => p.Id == parsedId.Value);
+                }
+                if (product == null)
+                {
+                    var nameCandidate = baseName;
+                    product = _db.Products.FirstOrDefault(p => p.Name == nameCandidate);
+                }
+
+                if (product != null)
+                {
+                    product.ImageUrl = relUrl;
+                    _db.SaveChanges();
+                    updated++;
+                }
+                else if (!updateOnly)
+                {
+                    var newProduct = new Product
+                    {
+                        Name = baseName,
+                        Description = "",
+                        Price = 0,
+                        DiscountPrice = null,
+                        ImageUrl = relUrl,
+                        Category = string.IsNullOrWhiteSpace(category) ? "Unisex" : category!,
+                        IsFeatured = false,
+                        IsSpecialDeal = false
+                    };
+                    _db.Products.Add(newProduct);
+                    _db.SaveChanges();
+                    created++;
+                }
+            }
+
+            TempData["Success"] = $"Uploaded {saved} files. Updated {updated} products, created {created}.";
             return RedirectToAction("Index");
         }
 

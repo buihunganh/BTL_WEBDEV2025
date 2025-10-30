@@ -1,6 +1,7 @@
 using BTL_WEBDEV2025.Models;
 using Microsoft.AspNetCore.Mvc;
 using BTL_WEBDEV2025.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BTL_WEBDEV2025.Controllers
 {
@@ -44,21 +45,37 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Products/Men
         public IActionResult Men()
         {
-            var menProducts = TryGetProductsFromDb().Where(p => p.Category == "Men" || p.Category == "Unisex").ToList();
-            return View(menProducts);
+            var brands = _db.Brands.Select(b => b.Name).ToList();
+            var products = _db.Products
+                .Include(p => p.Brand)
+                .Where(p => p.CategoryId == 1 || p.CategoryId == 4)
+                .ToList();
+            ViewBag.Brands = brands;
+            return View(products);
         }
 
         // GET: Products/Women
         public IActionResult Women()
         {
-            var womenProducts = TryGetProductsFromDb().Where(p => p.Category == "Women" || p.Category == "Unisex").ToList();
-            return View(womenProducts);
+            var brands = _db.Brands.Select(b => b.Name).ToList();
+            var products = _db.Products
+                .Include(p => p.Brand)
+                .Where(p => p.CategoryId == 2 || p.CategoryId == 4)
+                .ToList();
+            ViewBag.Brands = brands;
+            return View(products);
         }
 
         // GET: Products/Kid
         public IActionResult Kid()
         {
-            return View(TryGetProductsFromDb().Where(p => p.Category == "Kid").ToList());
+            var brands = _db.Brands.Select(b => b.Name).ToList();
+            var products = _db.Products
+                .Include(p => p.Brand)
+                .Where(p => p.CategoryId == 3 || p.CategoryId == 4)
+                .ToList();
+            ViewBag.Brands = brands;
+            return View(products);
         }
 
         // GET: Products/Sale
@@ -79,6 +96,9 @@ namespace BTL_WEBDEV2025.Controllers
             
             return Json(filteredProducts);
         }
+
+        private List<string> GetAllBrandsForFilter() =>
+            _db.Brands.Select(b => b.Name).ToList();
 
         private List<Product> InitializeProducts()
         {

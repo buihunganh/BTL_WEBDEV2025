@@ -65,4 +65,39 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Apply pending migrations and seed minimal data (roles/admin) on startup
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+
+        // Seed Roles
+        if (!db.Roles.Any())
+        {
+            db.Roles.AddRange(
+                new BTL_WEBDEV2025.Models.Role { Id = 1, Name = "Admin" },
+                new BTL_WEBDEV2025.Models.Role { Id = 2, Name = "Customer" }
+            );
+            db.SaveChanges();
+        }
+
+        // Seed a default admin if missing
+        if (!db.Users.Any(u => u.RoleId == 1))
+        {
+            db.Users.Add(new BTL_WEBDEV2025.Models.User
+            {
+                Email = "admin@nike.com",
+                PasswordHash = "admin123", // demo only
+                FullName = "Admin Account",
+                PhoneNumber = "123456",
+                RoleId = 1
+            });
+            db.SaveChanges();
+        }
+    }
+    catch { /* ignore startup seeding errors in dev */ }
+}
+
 app.Run();

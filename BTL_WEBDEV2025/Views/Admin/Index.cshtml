@@ -8,6 +8,8 @@
         <h1 class="fw-bold">Product Management</h1>
         <div>
             <a href="@Url.Action("Create")" class="btn btn-dark me-2">Add New Product</a>
+            <a href="@Url.Action("BulkImages")" class="btn btn-outline-dark me-2">Bulk Upload Images</a>
+            <button id="mapImagesBtn" class="btn btn-outline-secondary me-2">Sync Images from Folder</button>
             <form method="post" asp-action="Logout" class="d-inline">
                 <button type="submit" class="btn btn-outline-danger">Logout</button>
             </form>
@@ -57,4 +59,39 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    document.getElementById('mapImagesBtn')?.addEventListener('click', function() {
+        if (!confirm('This will scan wwwroot/media/images/products and update ImageUrl for matching products. Continue?')) {
+            return;
+        }
+
+        fetch('/db/map-images', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                // Handle server errors (like 500) that return JSON
+                return res.json().then(errorData => {
+                    throw new Error(`Server Error ${res.status}: ${errorData.message || 'Unknown error'}. Check console for details.`);
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            alert(`Scan complete!\nFiles Found: ${data.filesFound}\nProducts Updated: ${data.updated}\nImages Not Matched: ${data.notFound}\n\nSee console for detailed log.`);
+            console.log("Sync Log:", data.log);
+            window.location.reload();
+        })
+        .catch(err => {
+            alert('An error occurred during the sync process. Please check the console for more details.');
+            console.error("Fetch Error Details:", err);
+        });
+    });
+</script>
+}
 
