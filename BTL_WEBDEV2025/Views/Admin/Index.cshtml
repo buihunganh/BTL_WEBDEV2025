@@ -4,12 +4,13 @@
     var tab = Context.Request.Query["tab"].ToString();
     var isProducts = string.Equals(tab, "products", StringComparison.OrdinalIgnoreCase);
     var isCustomers = string.Equals(tab, "customers", StringComparison.OrdinalIgnoreCase);
-    ViewData["ActiveMenu"] = isCustomers ? "customers" : (isProducts ? "products" : "dashboard");
+    var isReport = string.Equals(tab, "report", StringComparison.OrdinalIgnoreCase);
+    ViewData["ActiveMenu"] = isReport ? "report" : (isCustomers ? "customers" : (isProducts ? "products" : "dashboard"));
 }
 
 <div class="container-fluid px-4 my-4">
     @if (!isProducts && !isCustomers) {
-        <h1 class="fw-bold mb-4">Tổng quan</h1>
+        <h1 class="fw-bold mb-4">Overview</h1>
         <div class="row g-4 mb-4">
             <div class="col-6 col-md-3">
                 <div class="card shadow-sm bg-white text-dark h-100 border-0 rounded-4">
@@ -17,7 +18,7 @@
                         <div class="d-flex align-items-center mb-1">
                             <div class="me-2"><i class="bi bi-bar-chart-line fs-4"></i></div>
                             <div>
-                                <small class="text-muted">Doanh số (USD)</small>
+                                <small class="text-muted">Revenue (USD)</small>
                                 <div class="fs-4 fw-bold" id="stat-sales">0</div>
                             </div>
                         </div>
@@ -30,7 +31,7 @@
                         <div class="d-flex align-items-center mb-1">
                             <div class="me-2"><i class="bi bi-cart fs-4"></i></div>
                             <div>
-                                <small class="text-muted">Đơn hàng</small>
+                                <small class="text-muted">Orders</small>
                                 <div class="fs-4 fw-bold" id="stat-orders">0</div>
                             </div>
                         </div>
@@ -43,7 +44,7 @@
                         <div class="d-flex align-items-center mb-1">
                             <div class="me-2"><i class="bi bi-people fs-4"></i></div>
                             <div>
-                                <small class="text-muted">Khách hàng</small>
+                                <small class="text-muted">Customers</small>
                                 <div class="fs-4 fw-bold" id="stat-customers">0</div>
                             </div>
                         </div>
@@ -56,7 +57,7 @@
                         <div class="d-flex align-items-center mb-1">
                             <div class="me-2"><i class="bi bi-cash-coin fs-4"></i></div>
         <div>
-                                <small class="text-muted">Lợi nhuận</small>
+                                <small class="text-muted">Profit</small>
                                 <div class="fs-4 fw-bold" id="stat-profit">—</div>
                             </div>
                         </div>
@@ -66,7 +67,7 @@
         </div>
         <div class="card border-0 shadow-sm mb-4 rounded-4">
             <div class="card-body">
-                <h5 class="mb-3 fw-bold">Biểu đồ doanh số</h5>
+                <h5 class="mb-3 fw-bold">Revenue Chart</h5>
                 <canvas id="salesChart" height="60"></canvas>
     </div>
         </div>
@@ -75,19 +76,19 @@
     @if (isProducts) {
         <div>
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h1 class="fw-bold">Quản lý Sản phẩm</h1>
-                <button class="btn btn-dark" id="btnAddProduct"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
+                <h1 class="fw-bold">Product Management</h1>
+                <button class="btn btn-dark" id="btnAddProduct"><i class="bi bi-plus-lg"></i> Add Product</button>
             </div>
     <div class="table-responsive">
                 <table class="table table-striped align-middle">
             <thead>
                 <tr>
                     <th>ID</th>
-                            <th>Tên</th>
-                            <th>Mô tả</th>
-                            <th>Giá</th>
-                            <th>Danh mục</th>
-                            <th>Ảnh</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Image</th>
                             <th></th>
                 </tr>
             </thead>
@@ -100,18 +101,18 @@
     @if (isCustomers) {
         <div>
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h1 class="fw-bold">Quản lý Khách hàng</h1>
-                <button class="btn btn-dark" id="btnAddCustomer"><i class="bi bi-person-plus"></i> Thêm khách hàng</button>
+                <h1 class="fw-bold">Customer Management</h1>
+                <button class="btn btn-dark" id="btnAddCustomer"><i class="bi bi-person-plus"></i> Add Customer</button>
             </div>
             <div class="table-responsive">
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Họ tên</th>
+                            <th>Full name</th>
                             <th>Email</th>
-                            <th>SĐT</th>
-                            <th>Ngày sinh</th>
+                            <th>Phone</th>
+                            <th>Date of birth</th>
                             <th></th>
                     </tr>
                     </thead>
@@ -120,6 +121,112 @@
     </div>
         </div>
     }
+
+    @if (isReport) {
+        <div>
+            <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                <div>
+                    <label class="form-label mb-1">From</label>
+                    <input type="date" class="form-control" id="repFrom" />
+                </div>
+                <div>
+                    <label class="form-label mb-1">To</label>
+                    <input type="date" class="form-control" id="repTo" />
+                </div>
+                <button class="btn btn-dark" id="btnApplyReport">Apply</button>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><small class="text-muted">Revenue</small><div class="fs-4 fw-bold" id="rRevenue">$0</div></div></div></div>
+                <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><small class="text-muted">Orders</small><div class="fs-4 fw-bold" id="rOrders">0</div></div></div></div>
+                <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><small class="text-muted">Items</small><div class="fs-4 fw-bold" id="rItems">0</div></div></div></div>
+                <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><small class="text-muted">AOV</small><div class="fs-4 fw-bold" id="rAov">$0</div></div></div></div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4 rounded-4">
+                <div class="card-body">
+                    <h5 class="mb-3 fw-bold">Revenue by day</h5>
+                    <canvas id="reportSeries" height="60"></canvas>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm" class="row g-3">
+          <input type="hidden" id="pId" />
+          <div class="col-12">
+            <label class="form-label">Name</label>
+            <input class="form-control" id="pName" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="pDescription" rows="2"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Price (USD)</label>
+            <input type="number" step="0.01" min="0" class="form-control" id="pPrice" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <input class="form-control" id="pCategory" />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Image URL</label>
+            <input class="form-control" id="pImageUrl" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-dark" id="saveProductBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customerModalTitle">Add Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="customerForm" class="row g-3">
+          <input type="hidden" id="cId" />
+          <div class="col-12">
+            <label class="form-label">Full name</label>
+            <input class="form-control" id="cFullName" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="cEmail" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input class="form-control" id="cPhone" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Date of birth</label>
+            <input type="date" class="form-control" id="cDob" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-dark" id="saveCustomerBtn">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -135,6 +242,7 @@
 
         const isProducts = '@(isProducts)'.toLowerCase() === 'true';
         const isCustomers = '@(isCustomers)'.toLowerCase() === 'true';
+        const isReport = '@(isReport)'.toLowerCase() === 'true';
 
         // Tổng quan: nạp stats + chart
         if (!isProducts && !isCustomers) {
@@ -175,24 +283,50 @@
                   </td>
                 </tr>`).join('');
         }
-        async function addProduct(){
-            const name = prompt('Tên sản phẩm?'); if(!name) return;
-            const price = parseFloat(prompt('Giá (USD)?')||'0');
-            const description = prompt('Mô tả?')||'';
-            const imageUrl = prompt('Ảnh (URL)?')||'';
-            const category = prompt('Danh mục?')||'';
-            await fetchJson('/admin/api/products/create',{ method:'POST', body: JSON.stringify({ name, price, description, imageUrl, category })});
+        // Product modal workflow
+        const productModalEl = document.getElementById('productModal');
+        const productModal = productModalEl ? new bootstrap.Modal(productModalEl) : null;
+        function openProductModal(mode, data){
+            document.getElementById('productModalTitle').textContent = mode === 'edit' ? 'Edit Product' : 'Add Product';
+            document.getElementById('pId').value = data?.id||'';
+            document.getElementById('pName').value = data?.name||'';
+            document.getElementById('pDescription').value = data?.description||'';
+            document.getElementById('pPrice').value = data?.price||0;
+            document.getElementById('pCategory').value = data?.category||'';
+            document.getElementById('pImageUrl').value = data?.imageUrl||'';
+            productModal?.show();
+        }
+        async function saveProduct(){
+            const id = document.getElementById('pId').value;
+            const payload = {
+                name: document.getElementById('pName').value,
+                description: document.getElementById('pDescription').value,
+                price: parseFloat(document.getElementById('pPrice').value||'0'),
+                category: document.getElementById('pCategory').value,
+                imageUrl: document.getElementById('pImageUrl').value
+            };
+            if (id){
+                await fetchJson(`/admin/api/products/update/${id}`,{ method:'POST', body: JSON.stringify(payload) });
+            } else {
+                await fetchJson('/admin/api/products/create',{ method:'POST', body: JSON.stringify(payload) });
+            }
+            productModal?.hide();
             await loadProducts();
         }
+        async function addProduct(){ openProductModal('add'); }
         async function editProduct(id){
-            const name = prompt('Tên mới?'); if(!name) return;
-            const price = parseFloat(prompt('Giá (USD)?')||'0');
-            const description = prompt('Mô tả?')||'';
-            const imageUrl = prompt('Ảnh (URL)?')||'';
-            const category = prompt('Danh mục?')||'';
-            await fetchJson(`/admin/api/products/update/${id}`,{ method:'POST', body: JSON.stringify({ name, price, description, imageUrl, category })});
-            await loadProducts();
+            const row = [...document.querySelectorAll('#tableProducts tr')].find(tr=>tr.firstElementChild?.textContent==id);
+            const data = row ? {
+                id,
+                name: row.children[1].textContent,
+                description: row.children[2].textContent,
+                price: (row.children[3].textContent||'').replace(/[^0-9.]/g,''),
+                category: row.children[4].textContent,
+                imageUrl: row.children[5].querySelector('img')?.getAttribute('src')||''
+            } : { id };
+            openProductModal('edit', data);
         }
+        document.getElementById('saveProductBtn')?.addEventListener('click', saveProduct);
         async function deleteProduct(id){
             if(!confirm('Xóa sản phẩm?')) return;
             await fetchJson(`/admin/api/products/delete/${id}`,{ method:'POST' });
@@ -221,22 +355,47 @@
                   </td>
                 </tr>`).join('');
         }
-        async function addCustomer(){
-            const fullName = prompt('Họ tên?'); if(!fullName) return;
-            const email = prompt('Email?'); if(!email) return;
-            const phoneNumber = prompt('SĐT?')||'';
-            const dateOfBirth = prompt('Ngày sinh (YYYY-MM-DD)?')||null;
-            await fetchJson('/admin/api/customers/create',{ method:'POST', body: JSON.stringify({ fullName, email, phoneNumber, dateOfBirth })});
+        // Customer modal workflow
+        const customerModalEl = document.getElementById('customerModal');
+        const customerModal = customerModalEl ? new bootstrap.Modal(customerModalEl) : null;
+        function openCustomerModal(mode, data){
+            document.getElementById('customerModalTitle').textContent = mode === 'edit' ? 'Edit Customer' : 'Add Customer';
+            document.getElementById('cId').value = data?.id||'';
+            document.getElementById('cFullName').value = data?.fullName||'';
+            document.getElementById('cEmail').value = data?.email||'';
+            document.getElementById('cPhone').value = data?.phoneNumber||'';
+            document.getElementById('cDob').value = data?.dateOfBirth ? data.dateOfBirth.substring(0,10) : '';
+            customerModal?.show();
+        }
+        async function saveCustomer(){
+            const id = document.getElementById('cId').value;
+            const payload = {
+                fullName: document.getElementById('cFullName').value,
+                email: document.getElementById('cEmail').value,
+                phoneNumber: document.getElementById('cPhone').value,
+                dateOfBirth: document.getElementById('cDob').value || null
+            };
+            if (id){
+                await fetchJson(`/admin/api/customers/update/${id}`,{ method:'POST', body: JSON.stringify(payload) });
+            } else {
+                await fetchJson('/admin/api/customers/create',{ method:'POST', body: JSON.stringify(payload) });
+            }
+            customerModal?.hide();
             await loadCustomers();
         }
+        async function addCustomer(){ openCustomerModal('add'); }
         async function editCustomer(id){
-            const fullName = prompt('Họ tên mới?'); if(!fullName) return;
-            const email = prompt('Email?'); if(!email) return;
-            const phoneNumber = prompt('SĐT?')||'';
-            const dateOfBirth = prompt('Ngày sinh (YYYY-MM-DD)?')||null;
-            await fetchJson(`/admin/api/customers/update/${id}`,{ method:'POST', body: JSON.stringify({ fullName, email, phoneNumber, dateOfBirth })});
-            await loadCustomers();
+            const row = [...document.querySelectorAll('#tableCustomers tr')].find(tr=>tr.firstElementChild?.textContent==id);
+            const data = row ? {
+                id,
+                fullName: row.children[1].textContent,
+                email: row.children[2].textContent,
+                phoneNumber: row.children[3].textContent,
+                dateOfBirth: row.children[4].textContent ? new Date(row.children[4].textContent).toISOString() : ''
+            } : { id };
+            openCustomerModal('edit', data);
         }
+        document.getElementById('saveCustomerBtn')?.addEventListener('click', saveCustomer);
         async function deleteCustomer(id){
             if(!confirm('Xóa khách hàng?')) return;
             await fetchJson(`/admin/api/customers/delete/${id}`,{ method:'POST' });
@@ -246,6 +405,43 @@
             loadCustomers();
             document.getElementById('btnAddCustomer')?.addEventListener('click', addCustomer);
             window.editCustomer = editCustomer; window.deleteCustomer = deleteCustomer;
+        }
+
+        // Report minimal
+        let reportChart;
+        async function loadReport(){
+            const from = document.getElementById('repFrom').value;
+            const to = document.getElementById('repTo').value;
+            const q = new URLSearchParams(); if(from) q.set('from', from); if(to) q.set('to', to);
+            const summary = await fetchJson('/admin/api/report/summary?'+q.toString());
+            document.getElementById('rRevenue').textContent = fmtUSD(summary.revenueUSD);
+            document.getElementById('rOrders').textContent = summary.orders;
+            document.getElementById('rItems').textContent = summary.items;
+            document.getElementById('rAov').textContent = fmtUSD(summary.aov);
+
+            const series = await fetchJson('/admin/api/report/timeseries?'+q.toString());
+            const labels = series.map(x=>x.period);
+            const rev = series.map(x=>x.revenueUSD);
+            const ord = series.map(x=>x.orders);
+            const ctx2 = document.getElementById('reportSeries')?.getContext('2d');
+            if (ctx2){
+                if(reportChart) reportChart.destroy();
+                reportChart = new Chart(ctx2, { type:'bar', data:{ labels, datasets:[
+                    { type:'bar', label:'Revenue', data: rev, backgroundColor:'rgba(32,98,233,0.25)', borderColor:'#2062e9' },
+                    { type:'line', label:'Orders', data: ord, borderColor:'#ef4a64', yAxisID:'y1' }
+                ]}, options:{ responsive:true, scales:{ y1:{ position:'right', grid:{ drawOnChartArea:false } } } } });
+            }
+        }
+        function setDefaultRange(){
+            const to = new Date();
+            const from = new Date(); from.setDate(to.getDate()-30);
+            document.getElementById('repFrom').value = from.toISOString().slice(0,10);
+            document.getElementById('repTo').value = to.toISOString().slice(0,10);
+        }
+        if (isReport){
+            setDefaultRange();
+            document.getElementById('btnApplyReport')?.addEventListener('click', loadReport);
+            loadReport();
         }
 </script>
 }

@@ -61,6 +61,45 @@ namespace BTL_WEBDEV2025.Controllers
         }
 
         // =====================
+        // REPORT (minimal): summary & timeseries by day
+        // =====================
+        [HttpGet("/admin/api/report/summary")]
+        public async Task<IActionResult> ReportSummary([FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var start = (from ?? DateTime.UtcNow.Date.AddDays(-30)).Date;
+            var end = (to ?? DateTime.UtcNow.Date).Date.AddDays(1).AddTicks(-1); // inclusive end of day
+
+            var ordersInRange = _db.Orders.Where(o => o.CreatedAt >= start && o.CreatedAt <= end);
+            var revenue = await ordersInRange.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+            var orders = await ordersInRange.CountAsync();
+            var items = await _db.OrderDetails
+                .Where(od => ordersInRange.Select(o => o.Id).Contains(od.OrderId))
+                .SumAsync(od => (int?)od.Quantity) ?? 0;
+            var aov = orders == 0 ? 0 : revenue / orders;
+
+            return Ok(new { revenueUSD = revenue, orders, items, aov });
+        }
+
+        [HttpGet("/admin/api/report/timeseries")]
+        public async Task<IActionResult> ReportTimeseries([FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var start = (from ?? DateTime.UtcNow.Date.AddDays(-30)).Date;
+            var end = (to ?? DateTime.UtcNow.Date).Date.AddDays(1).AddTicks(-1);
+
+            var query = await _db.Orders
+                .Where(o => o.CreatedAt >= start && o.CreatedAt <= end)
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(g => new { period = g.Key, revenueUSD = g.Sum(x => x.TotalAmount), orders = g.Count() })
+                .OrderBy(x => x.period)
+                .ToListAsync();
+
+            var result = query.Select(x => new { period = x.period.ToString("yyyy-MM-dd"), x.revenueUSD, x.orders });
+            return Ok(result);
+        }
+
+        // =====================
         // PRODUCTS CRUD (JSON)
         // =====================
         [HttpGet("/admin/api/products")]
