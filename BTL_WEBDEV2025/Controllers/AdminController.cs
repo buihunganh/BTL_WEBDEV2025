@@ -2,6 +2,7 @@ using BTL_WEBDEV2025.Models;
 using BTL_WEBDEV2025.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace BTL_WEBDEV2025.Controllers
 {
@@ -27,18 +28,189 @@ namespace BTL_WEBDEV2025.Controllers
                 return RedirectToAction("Login");
             }
             
-            // Get products from database (use navigation properties)
-            var products = _db.Products
-                .Include(p => p.CategoryRef)
-                .Include(p => p.Brand)
-                .ToList();
-            return View(products);
+            // View hiện render theo tab qua query string; dữ liệu sẽ nạp bằng AJAX từ API bên dưới
+            return View();
         }
 
         // GET: Admin/Login
         public IActionResult Login()
         {
             return View();
+        }
+
+        // =====================
+        // JSON API for Dashboard
+        // =====================
+        [HttpGet("/admin/api/stats")]
+        public async Task<IActionResult> GetStats()
+        {
+            if (!IsAdmin()) return Unauthorized();
+
+            // Doanh số (USD) = tổng TotalAmount trong Orders
+            var totalSales = await _db.Orders.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+            var totalOrders = await _db.Orders.CountAsync();
+            // Khách hàng = Users trừ admin (RoleId != 1)
+            var totalCustomers = await _db.Users.CountAsync(u => u.RoleId != 1);
+
+            return Ok(new
+            {
+                totalSales,
+                totalOrders,
+                totalCustomers
+            });
+        }
+
+        // =====================
+        // PRODUCTS CRUD (JSON)
+        // =====================
+        [HttpGet("/admin/api/products")]
+        public async Task<IActionResult> GetProducts()
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var list = await _db.Products
+                .Include(p => p.CategoryRef)
+                .Include(p => p.Brand)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.Price,
+                    Category = p.CategoryRef != null ? p.CategoryRef.Name : (string.IsNullOrEmpty(p.Category) ? "" : p.Category),
+                    p.ImageUrl
+                }).ToListAsync();
+            return Ok(list);
+        }
+
+        public class ProductUpsertDto
+        {
+            public int? Id { get; set; }
+            [Required]
+            public string Name { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            [Range(0, double.MaxValue)]
+            public decimal Price { get; set; }
+            public string? ImageUrl { get; set; }
+            public string? Category { get; set; }
+        }
+
+        [HttpPost("/admin/api/products/create")]
+        public async Task<IActionResult> CreateProduct([FromBody] ProductUpsertDto dto)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description ?? string.Empty,
+                Price = dto.Price,
+                ImageUrl = dto.ImageUrl ?? string.Empty,
+                Category = dto.Category ?? string.Empty
+            };
+            _db.Products.Add(product);
+            await _db.SaveChangesAsync();
+            return Ok(new { product.Id });
+        }
+
+        [HttpPost("/admin/api/products/update/{id:int}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpsertDto dto)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return NotFound();
+            product.Name = dto.Name ?? product.Name;
+            product.Description = dto.Description ?? product.Description;
+            product.Price = dto.Price;
+            product.ImageUrl = dto.ImageUrl ?? product.ImageUrl;
+            if (!string.IsNullOrWhiteSpace(dto.Category)) product.Category = dto.Category!;
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("/admin/api/products/delete/{id:int}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return NotFound();
+            _db.Products.Remove(product);
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        // =====================
+        // CUSTOMERS CRUD (Users)
+        // =====================
+        [HttpGet("/admin/api/customers")]
+        public async Task<IActionResult> GetCustomers()
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var list = await _db.Users
+                .Where(u => u.RoleId != 1)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FullName,
+                    u.Email,
+                    u.PhoneNumber,
+                    u.DateOfBirth
+                }).ToListAsync();
+            return Ok(list);
+        }
+
+        public class CustomerUpsertDto
+        {
+            public int? Id { get; set; }
+            [Required, EmailAddress]
+            public string Email { get; set; } = string.Empty;
+            [Required]
+            public string FullName { get; set; } = string.Empty;
+            public string? PhoneNumber { get; set; }
+            public DateTime? DateOfBirth { get; set; }
+        }
+
+        [HttpPost("/admin/api/customers/create")]
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerUpsertDto dto)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var user = new User
+            {
+                Email = dto.Email,
+                FullName = dto.FullName,
+                PhoneNumber = dto.PhoneNumber,
+                DateOfBirth = dto.DateOfBirth,
+                PasswordHash = "temp", // nên thay bằng quy trình tạo tài khoản chuẩn
+                RoleId = 2
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+            return Ok(new { user.Id });
+        }
+
+        [HttpPost("/admin/api/customers/update/{id:int}")]
+        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerUpsertDto dto)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id && u.RoleId != 1);
+            if (user == null) return NotFound();
+            user.Email = dto.Email;
+            user.FullName = dto.FullName;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.DateOfBirth = dto.DateOfBirth;
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("/admin/api/customers/delete/{id:int}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            if (!IsAdmin()) return Unauthorized();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id && u.RoleId != 1);
+            if (user == null) return NotFound();
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
+            return Ok();
         }
 
         // POST: Admin/Login

@@ -1,13 +1,13 @@
 @model RegisterViewModel
 @{
     ViewData["Title"] = "Register";
-    Layout = "_AuthLayout";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
 <div class="auth-page">
     <div class="auth-container">
-        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
-        <h2 class="auth-title">Now let's make you a ABDD Member.</h2>
+        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDDT Logo" /><span>ABDDT</span></a></h1>
+        <h2 class="auth-title">Now let's make you a ABDDT Member.</h2>
         @if (!string.IsNullOrWhiteSpace(Model?.Email))
         {
             <div style="font-size: 14px; color: #333; margin-bottom: 8px;">Email: <strong>@Model.Email</strong></div>

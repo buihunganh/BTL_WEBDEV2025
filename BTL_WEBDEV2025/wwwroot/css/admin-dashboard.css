@@ -1,0 +1,62 @@
+body { background: #f9f9fb; min-height: 100vh; }
+.admin-sidebar {
+    min-width: 230px; max-width: 230px;
+    background: #232a37;
+    color: #fff;
+    min-height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex; flex-direction: column;
+    z-index: 10;
+    box-shadow: 2px 0 16px rgba(40,42,60,0.07);
+}
+.admin-sidebar .admin-logo {
+    font-weight: 700; font-size: 1.38rem; letter-spacing: 0.03em;
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid #374151;
+    display: flex; align-items: center; gap: 11px;
+}
+.admin-sidebar nav {
+    flex: 1;
+    padding-top: 14px;
+}
+.admin-sidebar .nav-link {
+    color: #dbeafe;
+    border-left: 4px solid transparent;
+    padding: 0.80rem 1.4rem 0.80rem 1.85rem;
+    display: flex; align-items: center; gap: 10px;
+    border-radius: 0;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.12s;
+}
+.admin-sidebar .nav-link.active, .admin-sidebar .nav-link:focus, .admin-sidebar .nav-link:hover {
+    background: #1e293b;
+    color: #fff;
+    border-left: 4px solid #00e0c5;
+}
+.admin-sidebar .logout-link {
+    color: #ff4477;
+    border-left: 4px solid transparent;
+}
+.admin-sidebar .admin-avatar {
+    padding: 20px 24px 16px;
+    font-size: 0.93rem;
+    font-weight: 400;
+    border-top: 1px solid #374151;
+    margin-top: auto;
+    display: flex; align-items: center; gap: 11px;
+}
+.admin-sidebar .admin-avatar .avatar-ico {
+    background: #475569; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.26rem; color: #fff;
+}
+.admin-content {
+    margin-left: 230px; padding: 0; min-height: 100vh; background: #fff; box-shadow: none;
+}
+@media (max-width: 800px) {
+    .admin-sidebar { min-width: 58px; max-width: 62px; }
+    .admin-sidebar .nav-link span, .admin-sidebar .admin-logo span, .admin-avatar .ava-name{ display: none; }
+    .admin-content { margin-left: 63px; }
+    .admin-sidebar .admin-logo, .admin-sidebar .admin-avatar { justify-content: center; }
+}

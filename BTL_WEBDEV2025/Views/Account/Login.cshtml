@@ -1,7 +1,7 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "Login";
-    Layout = "_AuthLayout";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
 <div class="auth-page">
@@ -18,11 +18,11 @@
                 }, 3500);
             </script>
         }
-        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDD Logo" /><span>ABDD</span></a></h1>
+        <h1 class="auth-logo"><a href="@Url.Action("Index","Home")"><img src="/media/images/shared/logo2.png" alt="ABDDT Logo" /><span>ABDDT</span></a></h1>
         <h2 class="auth-title">
             @if (Model?.IsNewUser ?? false)
             {
-                @:Now let's make you a ABDD Member.
+                @:Now let's make you a ABDDT Member.
                 <div style="margin-top:8px;"><a href="@Url.Action("Login","Account")" class="change-link">Change my email</a></div>
             }
             else if (Model?.ShowPassword ?? false)
