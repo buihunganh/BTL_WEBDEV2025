@@ -22,7 +22,21 @@ namespace BTL_WEBDEV2025.Controllers
         public IActionResult Index()
         {
             var all = TryGetProductsFromDb();
+            var brand = HttpContext.Request.Query["brand"].ToString();
+            if (!string.IsNullOrWhiteSpace(brand))
+            {
+                all = all.Where(p => p.Brand != null ? p.Brand.Name.Equals(brand, StringComparison.OrdinalIgnoreCase) : false).ToList();
+            }
             return View(all);
+        }
+
+        // GET: Products/Brand/{name}
+        public IActionResult Brand(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return RedirectToAction("Index");
+            var all = TryGetProductsFromDb().Where(p => p.Brand != null && p.Brand.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            ViewBag.BrandName = name;
+            return View("Index", all);
         }
 
         // GET: Products/Details/5

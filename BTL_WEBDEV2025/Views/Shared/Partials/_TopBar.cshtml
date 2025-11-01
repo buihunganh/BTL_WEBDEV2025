@@ -16,7 +16,19 @@
             <span class="separator" style="color: rgba(255, 255, 255, 0.3);">|</span>
             <span class="text-white" style="font-size: 0.75rem; opacity: 0.9; cursor: default; user-select: none;">Join Us</span>
             <span class="separator" style="color: rgba(255, 255, 255, 0.3);">|</span>
-            <a asp-controller="Account" asp-action="Login" class="text-white text-decoration-none" style="font-size: 0.75rem;">Sign In</a>
+            @if (Context.Session.GetInt32("UserId") != null)
+            {
+                var name = Context.Session.GetString("UserName") ?? Context.Session.GetString("UserEmail") ?? "User";
+                <a asp-controller="User" asp-action="Index" class="text-white text-decoration-none" style="font-size: 0.75rem;">Hello, @name</a>
+                <span class="separator" style="color: rgba(255, 255, 255, 0.3);">|</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-link p-0 text-white" style="font-size: 0.75rem; text-decoration: none;">Logout</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="text-white text-decoration-none" style="font-size: 0.75rem;">Sign In</a>
+            }
         </div>
     </div>
 </div>

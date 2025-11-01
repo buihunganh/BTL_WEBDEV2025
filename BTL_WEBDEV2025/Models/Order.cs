@@ -8,6 +8,7 @@ namespace BTL_WEBDEV2025.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public decimal TotalAmount { get; set; }
+        public string? ShippingAddress { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }

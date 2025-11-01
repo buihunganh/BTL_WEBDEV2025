@@ -5,11 +5,12 @@
     var isProducts = string.Equals(tab, "products", StringComparison.OrdinalIgnoreCase);
     var isCustomers = string.Equals(tab, "customers", StringComparison.OrdinalIgnoreCase);
     var isReport = string.Equals(tab, "report", StringComparison.OrdinalIgnoreCase);
-    ViewData["ActiveMenu"] = isReport ? "report" : (isCustomers ? "customers" : (isProducts ? "products" : "dashboard"));
+    var isInventory = string.Equals(tab, "inventory", StringComparison.OrdinalIgnoreCase);
+    ViewData["ActiveMenu"] = isInventory ? "inventory" : (isReport ? "report" : (isCustomers ? "customers" : (isProducts ? "products" : "dashboard")));
 }
 
 <div class="container-fluid px-4 my-4">
-    @if (!isProducts && !isCustomers) {
+    @if (!isProducts && !isCustomers && !isInventory && !isReport) {
         <h1 class="fw-bold mb-4">Overview</h1>
         <div class="row g-4 mb-4">
             <div class="col-6 col-md-3">
@@ -93,6 +94,30 @@
                 </tr>
             </thead>
                     <tbody id="tableProducts"></tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (isInventory) {
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h1 class="fw-bold">Inventory</h1>
+                <button class="btn btn-outline-secondary" id="btnReloadStock">Reload</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Variant ID</th>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Stock</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableInventory"></tbody>
                 </table>
             </div>
         </div>
@@ -243,6 +268,7 @@
         const isProducts = '@(isProducts)'.toLowerCase() === 'true';
         const isCustomers = '@(isCustomers)'.toLowerCase() === 'true';
         const isReport = '@(isReport)'.toLowerCase() === 'true';
+        const isInventory = '@(isInventory)'.toLowerCase() === 'true';
 
         // Tổng quan: nạp stats + chart
         if (!isProducts && !isCustomers) {
@@ -257,8 +283,8 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: { labels: ['02.08','03.08','10.08','20.08','30.08'], datasets: [
-                        {label:'Số lượng bán',data:[4,6,6,3,1],borderColor:'#ef4a64',backgroundColor:'rgba(239,74,100,0.13)',tension:0.25},
-                        {label:'Doanh số bán',data:[2,5,6,4,2],borderColor:'#2062e9',backgroundColor:'rgba(32,98,233,0.13)',tension:0.25}
+                        {label:'Units sold',data:[4,6,6,3,1],borderColor:'#ef4a64',backgroundColor:'rgba(239,74,100,0.13)',tension:0.25},
+                        {label:'Sales revenue',data:[2,5,6,4,2],borderColor:'#2062e9',backgroundColor:'rgba(32,98,233,0.13)',tension:0.25}
                     ]}, options:{ responsive:true, plugins:{ legend:{ display:true, position:'top' } } }
                 });
             }
@@ -278,8 +304,8 @@
                   <td>${p.category||''}</td>
                   <td>${p.imageUrl?`<img src="${p.imageUrl}" style="height:40px">`:''}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${p.id})">Sửa</button>
-                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteProduct(${p.id})">Xóa</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${p.id})">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${p.id})">Delete</button>
                   </td>
                 </tr>`).join('');
         }
@@ -328,7 +354,7 @@
         }
         document.getElementById('saveProductBtn')?.addEventListener('click', saveProduct);
         async function deleteProduct(id){
-            if(!confirm('Xóa sản phẩm?')) return;
+            if(!confirm('Delete this product?')) return;
             await fetchJson(`/admin/api/products/delete/${id}`,{ method:'POST' });
             await loadProducts();
         }
@@ -350,8 +376,8 @@
                   <td>${c.phoneNumber||''}</td>
                   <td>${c.dateOfBirth? new Date(c.dateOfBirth).toLocaleDateString(): ''}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="editCustomer(${c.id})">Sửa</button>
-                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteCustomer(${c.id})">Xóa</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editCustomer(${c.id})">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteCustomer(${c.id})">Delete</button>
                   </td>
                 </tr>`).join('');
         }
@@ -397,7 +423,7 @@
         }
         document.getElementById('saveCustomerBtn')?.addEventListener('click', saveCustomer);
         async function deleteCustomer(id){
-            if(!confirm('Xóa khách hàng?')) return;
+            if(!confirm('Delete this customer?')) return;
             await fetchJson(`/admin/api/customers/delete/${id}`,{ method:'POST' });
             await loadCustomers();
         }
@@ -405,6 +431,30 @@
             loadCustomers();
             document.getElementById('btnAddCustomer')?.addEventListener('click', addCustomer);
             window.editCustomer = editCustomer; window.deleteCustomer = deleteCustomer;
+        }
+
+        // Inventory: list + inline update
+        async function loadInventory(){
+            const rows = await fetchJson('/admin/api/inventory');
+            const tb = document.getElementById('tableInventory'); if(!tb) return;
+            tb.innerHTML = rows.map(v=>`
+                <tr>
+                  <td>${v.id}</td>
+                  <td>${v.productName} (#${v.productId})</td>
+                  <td>${v.size}</td>
+                  <td>${v.color}</td>
+                  <td><input type="number" class="form-control form-control-sm w-auto" value="${v.stockQuantity}" min="0" id="stk-${v.id}" /></td>
+                  <td><button class="btn btn-sm btn-dark" onclick="updateStock(${v.id})">Save</button></td>
+                </tr>`).join('');
+        }
+        async function updateStock(id){
+            const val = parseInt(document.getElementById('stk-'+id).value||'0',10);
+            await fetchJson(`/admin/api/inventory/update/${id}`,{ method:'POST', body: JSON.stringify({ stockQuantity: val }) });
+        }
+        if (isInventory){
+            loadInventory();
+            document.getElementById('btnReloadStock')?.addEventListener('click', loadInventory);
+            window.updateStock = updateStock;
         }
 
         // Report minimal
