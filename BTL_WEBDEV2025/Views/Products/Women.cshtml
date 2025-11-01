@@ -1,85 +1,104 @@
 ﻿@model List<Product>
 @{
     ViewData["Title"] = "Women";
+    // dùng chung key như Men để luôn có đủ danh sách brand
     var brands = ViewBag.Brands as List<string>;
 }
 
-<div class="container-fluid px-4 my-4 men-page">
-    <h1 class="fw-bold mb-3">Women</h1>
-    <p class="text-muted mb-4">All women's shoes. Jump by brand.</p>
-    <div class="brand-subnav d-flex flex-wrap gap-2 mb-4">
-        <a class="btn btn-outline-dark btn-sm" href="#all">All</a>
-        @foreach (var b in brands)
-        {
-            <a class="btn btn-outline-dark btn-sm" href="#brand-@b.Replace(" ", "-")">@b</a>
-        }
-    </div>
-    <!-- Filter toolbar -->
-    <div class="card border-0 mb-3">
-        <div class="card-body py-3 px-0">
-            <div class="row g-3 align-items-end">
-                <div class="col-6 col-md-3">
-                    <label for="minPrice" class="form-label small text-muted mb-1">Price from</label>
-                    <input type="number" min="0" step="1" class="form-control" id="minPrice" placeholder="0">
-                </div>
-                <div class="col-6 col-md-3">
-                    <label for="maxPrice" class="form-label small text-muted mb-1">To</label>
-                    <input type="number" min="0" step="1" class="form-control" id="maxPrice" placeholder="9999">
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="form-label small text-muted mb-1">Brand</div>
-                    <div class="d-flex flex-wrap gap-2" id="brandChecks">
-                        @foreach (var b in brands)
-                        {
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input brand-check" type="checkbox" id="chk-@b.Replace(" ", "-")" value="@b">
-                                <label class="form-check-label" for="chk-@b.Replace(" ", "-")">@b</label>
-                            </div>
-                        }
-                    </div>
-                </div>
-                <div class="col-12 col-md-2">
-                    <label for="priceOrder" class="form-label small text-muted mb-1">Sort by price</label>
-                    <select class="form-select" id="priceOrder">
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
-                    </select>
-                </div>
-            </div>
-            <div class="d-flex gap-2 mt-3">
-                <button id="applyFilters" class="btn btn-dark btn-sm">Apply</button>
-                <button id="resetFilters" class="btn btn-outline-dark btn-sm">Reset</button>
-            </div>
+<div class="container-xl py-4 women-page">
+    <h1 class="fw-bold mb-2 text-uppercase">Women's Shoes</h1>
+
+    <div class="d-md-flex justify-content-between align-items-center mb-4 gap-3">
+        <!-- Brand nav pills (giống Men: dùng #all và #brand-...) -->
+        <div class="brand-nav-tabs my-2 my-md-0 flex-grow-1" id="brandNavTabsWomen">
+            <a class="btn btn-outline-primary btn-sm rounded-pill me-2 mb-2" href="#all">All Brands</a>
+            @if (brands != null)
+            {
+                foreach (var b in brands)
+                {
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill me-2 mb-2"
+                       href="#brand-@b.Replace(" ", "-")">@b</a>
+                }
+            }
         </div>
+
+        <!-- Filter bar (giống Men) -->
+        <form class="row row-cols-2 row-cols-md-auto g-2 align-items-end filter-bar shadow-sm p-2 rounded bg-white flex-nowrap my-2"
+              autocomplete="off" onsubmit="return false;">
+            <div class="col-auto">
+                <label class="form-label small text-muted">Min price</label>
+                <input type="number" min="0" step="1" class="form-control border-0 bg-light" id="womenMinPrice" style="width:100px;">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted">Max price</label>
+                <input type="number" min="0" step="1" class="form-control border-0 bg-light" id="womenMaxPrice" style="width:100px;">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted">Brand</label>
+                <select class="form-select border-0 bg-light" id="womenBrandSelect">
+                    <option value="">All</option>
+                    @if (brands != null)
+                    {
+                        foreach (var b in brands)
+                        {
+                            <option value="@b">@b</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label small text-muted">Sort</label>
+                <select class="form-select border-0 bg-light" id="womenSortPrice">
+                    <option value="asc">Price ↑</option>
+                    <option value="desc">Price ↓</option>
+                </select>
+            </div>
+            <div class="col-auto d-flex gap-1">
+                <button type="button" class="btn btn-primary btn-sm px-3" id="womenApplyFilters">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm px-2" id="womenResetFilters" title="Clear filters">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </form>
     </div>
 
-    <!-- All products grid -->
-    <section id="all" class="brand-section">
-        <h2 class="brand-heading">All Shoes</h2>
-        <div class="row g-4" id="menGrid">
+    <!-- All products (id = all, giống Men) -->
+    <section id="all">
+        <div class="row g-3" id="womenGrid">
             @foreach (var product in Model)
             {
                 var brand = product.Brand?.Name ?? "Others";
-                <div class="col-6 col-md-4 col-lg-3 product-item" data-price="@product.Price" data-brand="@brand">
-                    <div class="card h-100 border hover-lift" style="border-radius:16px;">
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:220px;">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item"
+                     data-product-id="@product.Id"
+                     data-price="@product.Price"
+                     data-brand="@brand"
+                     data-name="@product.Name.ToLower()">
+                    <div class="card men-card border rounded-4 h-100 bg-white">
+                        <div class="d-flex align-items-end justify-content-center men-card-img-wrapper position-relative" style="background:#fff;">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
-                                <img src="@product.ImageUrl" alt="@product.Name" class="img-fluid" style="max-height:200px;object-fit:contain;" loading="lazy" />
+                                <img src="@product.ImageUrl" alt="@product.Name" class="img-fluid card-thumb-img" loading="lazy" />
                             }
                             else
                             {
                                 <i class="bi bi-image fs-1 text-secondary"></i>
                             }
+                            @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
+                            }
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold">@product.Name</h5>
-                            <p class="card-text small text-muted">@product.Description</p>
-                            <div class="d-flex justify-content-between align-items-center">
+                        <div class="card-body d-flex flex-column align-items-start p-3 pb-2">
+                            <span class="badge bg-light border text-dark fw-normal mb-1 px-2 py-1 small">@brand</span>
+                            <h5 class="fw-bold mb-1" style="font-size:1.13rem;">@product.Name</h5>
+                            <div class="small text-muted mb-2" style="min-height:38px;">@product.Description</div>
+                            <div class="mt-auto">
                                 @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
                                 {
-                                    <span class="text-decoration-line-through text-muted small">$@product.Price</span>
-                                    <span class="text-danger fw-bold">$@product.DiscountPrice</span>
+                                    <span class="text-danger fw-bold me-2">$@product.DiscountPrice</span>
+                                    <span class="text-decoration-line-through small text-muted">$@product.Price</span>
                                 }
                                 else
                                 {
@@ -87,117 +106,199 @@
                                 }
                             </div>
                         </div>
+                        <a href="#" class="order-btn" role="button">Order</a>
                     </div>
                 </div>
             }
         </div>
     </section>
 
-    <!-- Dynamic brand sections from DB -->
-    @foreach (var b in brands)
+    <!-- Per-brand sections (giống Men) -->
+    @if (brands != null)
     {
-        <section id="brand-@b.Replace(" ", "-")" class="brand-section mt-5">
-            <h2 class="brand-heading">@b</h2>
-            <div class="row g-4">
-                @foreach (var product in Model.Where(p => (p.Brand != null ? p.Brand.Name == b : false)))
+        foreach (var br in brands)
+        {
+            var items = Model.Where(p => p.Brand?.Name == br).ToList();
+            <section id="brand-@br.Replace(" ", "-")" class="mt-5 brand-section">
+                <h2 class="h4 fw-bold mb-3 brand-heading">@br</h2>
+
+                @if (items.Any())
                 {
-                    <div class="col-6 col-md-4 col-lg-3 product-item"
-                         data-price="@product.Price"
-                         data-brand="@(product.Brand?.Name ?? (product.CategoryRef?.Name ?? (product.Category ?? "")))">
-                        <div class="card h-100 border hover-lift">
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-                                <i class="bi bi-image fs-1 text-secondary"></i>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title fw-bold">@product.Name</h5>
-                                <p class="card-text small text-muted">@product.Description</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    @if (product.DiscountPrice.HasValue)
-                                    {
-                                        <span class="text-decoration-line-through text-muted small">$@product.Price</span>
-                                        <span class="text-danger fw-bold">$@product.DiscountPrice</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="fw-bold">$@product.Price</span>
-                                    }
+                    <div class="row g-3">
+                        @foreach (var product in items)
+                        {
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item"
+                                 data-product-id="@product.Id"
+                                 data-price="@product.Price"
+                                 data-brand="@br"
+                                 data-name="@product.Name.ToLower()">
+                                <div class="card men-card border rounded-4 h-100 bg-white">
+                                    <div class="d-flex align-items-end justify-content-center men-card-img-wrapper position-relative" style="background:#fff;">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name" class="img-fluid card-thumb-img" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-image fs-1 text-secondary"></i>
+                                        }
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                        {
+                                            <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
+                                        }
+                                    </div>
+                                    <div class="card-body d-flex flex-column align-items-start p-3 pb-2">
+                                        <span class="badge bg-light border text-dark fw-normal mb-1 px-2 py-1 small">@br</span>
+                                        <h5 class="fw-bold mb-1" style="font-size:1.13rem;">@product.Name</h5>
+                                        <div class="small text-muted mb-2" style="min-height:38px;">@product.Description</div>
+                                        <div class="mt-auto">
+                                            @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                            {
+                                                <span class="text-danger fw-bold me-2">$@product.DiscountPrice</span>
+                                                <span class="text-decoration-line-through small text-muted">$@product.Price</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold">$@product.Price</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <a href="#" class="order-btn" role="button">Order</a>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 }
-            </div>
-        </section>
+                else
+                {
+                    <div class="text-muted mb-3">Updating products for @br.</div>
+                }
+            </section>
+        }
     }
-
 </div>
+
+@section Styles {
+    <!-- Tái dùng style từ Men.cshtml: class men-page giúp ăn đúng CSS sticky đã có -->
+    <style>
+        .men-card {
+            border-radius: 16px !important;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+            min-height: 430px;
+            display: flex;
+            flex-direction: column;
+            border: 1.5px solid #E5E5E5;
+            background: #fff;
+            transition: box-shadow .17s,border-color .13s,transform .17s;
+        }
+
+            .men-card:hover {
+                box-shadow: 0 22px 52px rgba(0,0,0,.15);
+                transform: translateY(-7px) scale(1.034);
+                border-color: #181818;
+            }
+
+        .men-card-img-wrapper {
+            min-height: 220px;
+            max-height: 240px;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            padding-top: 38px;
+            padding-bottom: 12px;
+            border-radius: 16px 16px 0 0 !important;
+        }
+
+        .card-thumb-img {
+            width: auto;
+            max-width: 85%;
+            height: 90%;
+            object-fit: contain;
+            object-position: center 88%;
+            transition: transform .22s;
+            background: transparent;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 6px 22px rgba(0,0,0,0.12));
+        }
+
+        .men-card:hover .card-thumb-img {
+            transform: scale(1.08) rotate(-2deg);
+        }
+
+        .filter-bar {
+            background: #F5F5F5;
+            border: 1.3px solid #E5E5E5;
+        }
+
+        .brand-nav-tabs .btn {
+            transition: background .18s,color .18s;
+            border: 1.5px solid #E5E5E5;
+            font-weight: 500;
+            color: #232323;
+            background: #fff;
+        }
+
+            .brand-nav-tabs .btn.active, .brand-nav-tabs .btn:hover {
+                background: #111;
+                color: #fff;
+                border-color: #111;
+            }
+
+        /* removed view-level .order-btn to use global nike-style.css */
+    </style>
+}
 
 @section Scripts {
     <script>
-        (function(){
-            const grid = document.getElementById('menGrid');
+        (function () {
+            // Smooth scroll cho brand pills - same as Men
+            document.querySelectorAll('#brandNavTabsWomen a').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const id = this.getAttribute('href');
+                    const el = document.querySelector(id);
+                    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                });
+            });
+
+            // Filter giống Men (riêng grid Women)
+            const grid = document.getElementById('womenGrid');
             const items = Array.from(grid.querySelectorAll('.product-item'));
-            const minI = document.getElementById('minPrice');
-            const maxI = document.getElementById('maxPrice');
-            const orderSel = document.getElementById('priceOrder');
-            const applyBtn = document.getElementById('applyFilters');
-            const resetBtn = document.getElementById('resetFilters');
+            const minI = document.getElementById('womenMinPrice');
+            const maxI = document.getElementById('womenMaxPrice');
+            const brandS = document.getElementById('womenBrandSelect');
+            const sortS = document.getElementById('womenSortPrice');
+            const applyBtn = document.getElementById('womenApplyFilters');
+            const resetBtn = document.getElementById('womenResetFilters');
 
-            // compute sticky offset to stick right under the main header
-            function updateStickyOffset(){
-                const topBar = document.querySelector('.top-bar');
-                const nav = document.querySelector('.navbar.sticky-top');
-                const promo = document.querySelector('.promotion-bar');
-                const h = (topBar? topBar.offsetHeight:0) + (nav? nav.offsetHeight:0) + (promo? promo.offsetHeight:0);
-                document.documentElement.style.setProperty('--sticky-offset', h + 'px');
-            }
-            updateStickyOffset();
-            window.addEventListener('resize', updateStickyOffset);
+            function apply() {
+                const minV = parseFloat(minI.value) || null;
+                const maxV = parseFloat(maxI.value) || null;
+                const brand = brandS.value;
 
-            function getSelectedBrands(){
-                const checks = document.querySelectorAll('.brand-check:checked');
-                return Array.from(checks).map(c => c.value.toLowerCase());
-            }
-
-            function priceInRange(price, minV, maxV){
-                if (!isNaN(minV) && price < minV) return false;
-                if (!isNaN(maxV) && price > maxV) return false;
-                return true;
-            }
-
-            function apply(){
-                const minV = parseFloat(minI.value);
-                const maxV = parseFloat(maxI.value);
-                const selBrands = getSelectedBrands();
-                const useBrand = selBrands.length > 0;
-
-                // filter
                 items.forEach(el => {
                     const price = parseFloat(el.getAttribute('data-price'));
-                    const brand = (el.getAttribute('data-brand') || '').toLowerCase();
-                    const passPrice = priceInRange(price, minV, maxV);
-                    const passBrand = !useBrand || selBrands.includes(brand);
-                    el.style.display = (passPrice && passBrand) ? '' : 'none';
+                    const br = el.getAttribute('data-brand');
+                    const pass = (!minV || price >= minV) && (!maxV || price <= maxV) && (!brand || br === brand);
+                    el.style.display = pass ? '' : 'none';
                 });
 
-                // sort by price
-                const visible = items.filter(el => el.style.display !== 'none');
-                visible.sort((a,b) => {
+                const visible = items.filter(e => e.style.display !== 'none');
+                visible.sort((a, b) => {
                     const pa = parseFloat(a.getAttribute('data-price'));
                     const pb = parseFloat(b.getAttribute('data-price'));
-                    return orderSel.value === 'asc' ? pa - pb : pb - pa;
+                    return sortS.value === 'asc' ? pa - pb : pb - pa;
                 });
-                visible.forEach(el => grid.appendChild(el));
+                visible.forEach(card => grid.appendChild(card));
             }
 
-            function reset(){
-                minI.value = '';
-                maxI.value = '';
-                document.querySelectorAll('.brand-check').forEach(c => c.checked = false);
-                orderSel.value = 'asc';
-                items.forEach(el => el.style.display = '');
-                // restore original order
-                items.forEach(el => grid.appendChild(el));
+            function reset() {
+                minI.value = ''; maxI.value = ''; brandS.value = ''; sortS.value = 'asc';
+                items.forEach(e => e.style.display = '');
+                items.forEach(card => grid.appendChild(card));
             }
 
             applyBtn.addEventListener('click', apply);
@@ -205,5 +306,3 @@
         })();
     </script>
 }
-
-

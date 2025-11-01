@@ -5,11 +5,12 @@
     var isProducts = string.Equals(tab, "products", StringComparison.OrdinalIgnoreCase);
     var isCustomers = string.Equals(tab, "customers", StringComparison.OrdinalIgnoreCase);
     var isReport = string.Equals(tab, "report", StringComparison.OrdinalIgnoreCase);
+    var isOrders = string.Equals(tab, "orders", StringComparison.OrdinalIgnoreCase);
     ViewData["ActiveMenu"] = isReport ? "report" : (isCustomers ? "customers" : (isProducts ? "products" : "dashboard"));
 }
 
 <div class="container-fluid px-4 my-4">
-    @if (!isProducts && !isCustomers) {
+    @if (!isProducts && !isCustomers && !isOrders) {
         <h1 class="fw-bold mb-4">Overview</h1>
         <div class="row g-4 mb-4">
             <div class="col-6 col-md-3">
@@ -149,6 +150,47 @@
             </div>
         </div>
     }
+
+    @if (isOrders) {
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h1 class="fw-bold">Order Management</h1>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Created</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Pay By</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableOrders"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Order details modal -->
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body" id="orderDetailsBody"></div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    }
 </div>
 
 <!-- Product Modal -->
@@ -243,9 +285,10 @@
         const isProducts = '@(isProducts)'.toLowerCase() === 'true';
         const isCustomers = '@(isCustomers)'.toLowerCase() === 'true';
         const isReport = '@(isReport)'.toLowerCase() === 'true';
+        const isOrders = '@(isOrders)'.toLowerCase() === 'true';
 
         // Tổng quan: nạp stats + chart
-        if (!isProducts && !isCustomers) {
+        if (!isProducts && !isCustomers && !isOrders) {
             fetchJson('/admin/api/stats').then(s => {
                 document.getElementById('stat-sales').textContent = fmtUSD(s.totalSales);
                 document.getElementById('stat-orders').textContent = s.totalOrders;
@@ -262,6 +305,53 @@
                     ]}, options:{ responsive:true, plugins:{ legend:{ display:true, position:'top' } } }
                 });
             }
+        }
+
+        // Orders: list + details
+        async function loadOrders(){
+            const rows = await fetchJson('/admin/api/orders');
+            const tb = document.getElementById('tableOrders'); if(!tb) return;
+            tb.innerHTML = rows.map(o=>`
+                <tr>
+                  <td>${o.id}</td>
+                  <td>${o.userName||''}</td>
+                  <td>${new Date(o.createdAt).toLocaleString()}</td>
+                  <td>${o.items}</td>
+                  <td>${fmtUSD(o.totalAmount)}</td>
+                  <td>${o.paymentMethod||''}</td>
+                  <td>${o.status||''}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewOrder(${o.id})">View</button>
+                  </td>
+                </tr>`).join('');
+        }
+        async function viewOrder(id){
+            try{
+                const dto = await fetchJson('/admin/api/orders/' + id);
+                const body = document.getElementById('orderDetailsBody');
+                body.innerHTML = '';
+                const h = document.createElement('div');
+                h.innerHTML = `<div class="mb-2"><strong>Order #${dto.id}</strong> — ${dto.userName} — ${new Date(dto.createdAt).toLocaleString()}</div>`;
+                body.appendChild(h);
+                const tbl = document.createElement('table'); tbl.className = 'table';
+                tbl.innerHTML = `<thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Subtotal</th></tr></thead>`;
+                const tbod = document.createElement('tbody');
+                dto.items.forEach(i=>{
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${i.productName}</td><td>${i.quantity}</td><td>${fmtUSD(i.unitPrice)}</td><td>${fmtUSD(i.quantity * i.unitPrice)}</td>`;
+                    tbod.appendChild(tr);
+                });
+                tbl.appendChild(tbod);
+                body.appendChild(tbl);
+                const info = document.createElement('div'); info.className='mt-2'; info.innerHTML = `<strong>Total:</strong> ${fmtUSD(dto.totalAmount)}<br/><strong>Pay By:</strong> ${dto.paymentMethod || ''}<br/><strong>Status:</strong> ${dto.status || ''}`;
+                body.appendChild(info);
+                const modalEl = document.getElementById('orderDetailsModal');
+                const modal = new bootstrap.Modal(modalEl); modal.show();
+            }catch(e){ console.error(e); alert('Failed to load order'); }
+        }
+
+        if (isOrders) {
+            loadOrders();
         }
 
         // Products: list + CRUD

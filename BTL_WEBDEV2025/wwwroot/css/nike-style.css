@@ -591,10 +591,11 @@ input[placeholder="Search"]::placeholder {
 }
 
 .navbar-nav .nav-item.has-mega .mega-dropdown {
-    position: absolute;
+    /* use fixed so the dropdown is outside any stacking context created by page content */
+    position: fixed;
     left: 50%;
-    transform: translateX(-50%) translateY(10px);
-    top: 100%;
+    transform: translateX(-50%) translateY(0);
+    top: var(--navbar-height, 64px);
     min-width: 720px;
     background: #fff;
     border: 1px solid #E5E5E5;
@@ -603,8 +604,18 @@ input[placeholder="Search"]::placeholder {
     opacity: 0;
     visibility: hidden;
     transition: opacity 160ms ease, transform 200ms ease, visibility 0s linear 200ms;
-    z-index: 1050;
+    z-index: 99999;
     padding: 18px 18px 12px;
+}
+
+/* keep original absolute behaviour on small screens (inside navbar collapse) */
+@media (max-width: 991.98px) {
+    .navbar-nav .nav-item.has-mega .mega-dropdown {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        top: 100%;
+    }
 }
 
 .navbar-nav .nav-item.has-mega:hover > .mega-dropdown,
@@ -709,46 +720,49 @@ input[placeholder="Search"]::placeholder {
     .mega-columns { grid-template-columns: 1fr; gap: 20px; }
 }
 
-/* Men brand page styles */
-.men-page .brand-subnav {
-    position: sticky;
-    top: var(--sticky-offset, 64px);
-    z-index: 1020;
-    background: #fff;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border-top: 1px solid #E5E5E5;
-    border-bottom: 1px solid #E5E5E5;
-    /* stretch to viewport width to align with header */
-    margin-left: -3rem;
-    margin-right: -3rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
+/* Sticky subnav dùng chung */
+.men-page .brand-subnav,
+.women-page .brand-subnav,
+.kid-page .brand-subnav{
+  position: sticky;
+  top: var(--sticky-offset, 64px);
+  z-index: 1020;           /* dưới navbar/dropdown (1030) nhưng đủ cao so với grid */
+  background: #fff;
+  padding: 8px 0;
+  border-top: 1px solid #E5E5E5;
+  border-bottom: 1px solid #E5E5E5;
+
+  /* stretch theo viewport như trang Men */
+  margin-left: -3rem;  margin-right: -3rem;
+  padding-left: 3rem;  padding-right: 3rem;
 }
 
-@media (max-width: 1200px) {
-    .men-page .brand-subnav {
-        margin-left: -2rem;
-        margin-right: -2rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-    }
+@media (max-width: 1200px){
+  .men-page .brand-subnav,
+  .women-page .brand-subnav,
+  .kid-page .brand-subnav{
+    margin-left: -2rem;  margin-right: -2rem;
+    padding-left: 2rem;  padding-right: 2rem;
+  }
+}
+@media (max-width: 768px){
+  .men-page .brand-subnav,
+  .women-page .brand-subnav,
+  .kid-page .brand-subnav{
+    margin-left: -1.5rem;  margin-right: -1.5rem;
+    padding-left: 1.5rem;  padding-right: 1.5rem;
+  }
 }
 
-@media (max-width: 768px) {
-    .men-page .brand-subnav {
-        margin-left: -1.5rem;
-        margin-right: -1.5rem;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
+/* Heading dùng chung */
+.men-page .brand-heading,
+.women-page .brand-heading,
+.kid-page .brand-heading{
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
-.men-page .brand-heading {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
 
 /* Avoid headings being hidden under sticky subnav when navigating to anchors */
 .men-page .brand-section { scroll-margin-top: calc(var(--sticky-offset, 64px) + 56px); }
@@ -762,3 +776,97 @@ html { scroll-behavior: smooth; }
 /* Auth pages - minimalist form styling consistent with tone */
 .auth .form-control { border-radius: 10px; }
 .auth .btn-dark { padding-left: 20px; padding-right: 20px; }
+
+/* Order button overlay */
+.men-card { position: relative; overflow: hidden; /* allow absolute-positioned controls like order button */ border-radius: 16px !important; box-shadow: 0 6px 24px rgba(0,0,0,0.09); min-height: 430px; display: flex; flex-direction: column; border: 1.5px solid #E5E5E5; background: #fff; transition: box-shadow .17s,border-color .13s,transform .17s; }
+
+/* subtle overlay / dim by reducing opacity of main parts (image + body) */
+.product-item .men-card .men-card-img-wrapper,
+.product-item .men-card .card-body {
+    transition: opacity .18s ease, filter .18s ease;
+}
+.product-item:hover .men-card .men-card-img-wrapper,
+.product-item:hover .men-card .card-body,
+.product-item:focus-within .men-card .men-card-img-wrapper,
+.product-item:focus-within .men-card .card-body {
+    opacity: 0.45;
+    filter: blur(0.6px) brightness(0.95);
+}
+
+/* centered square Order button */
+.order-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 12px);
+    opacity: 0;
+    transition: transform .18s ease, opacity .18s ease, box-shadow .18s, background-color .18s, color .18s;
+    z-index: 20; /* above dimmed content */
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-radius: 6px; /* slightly rounded square */
+    background-color: #ffffff; /* default: white */
+    color: #111; /* default: dark text */
+    border: 1px solid #E5E5E5;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* when hovering the card or focusing within it, show button but do NOT invert colors */
+.product-item:hover .order-btn,
+.product-item:focus-within .order-btn {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    /* keep default white bg and dark text until the button itself is hovered */
+    background-color: #ffffff;
+    color: #111;
+    border-color: #E5E5E5;
+}
+
+/* hovering the button inverts colors to black background / white text */
+.order-btn:hover {
+    background-color: #111 !important;
+    color: #fff !important;
+    border-color: #111 !important;
+    transform: translate(-50%, -52%) !important; /* slight lift on hover */
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18) !important;
+}
+
+/* active / focus state: keep inverted colors */
+.order-btn:active,
+.order-btn:focus,
+.order-btn:focus-visible {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #000 !important;
+    transform: translate(-50%, -52%) !important; /* keep lifted position when pressed/focused */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.28) !important;
+    outline: none;
+}
+
+.order-btn:focus-visible {
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.08), 0 8px 20px rgba(0,0,0,0.28) !important;
+}
+
+/* Order modal styles */
+.order-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+.order-modal.show{display:flex}
+.order-modal .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.order-modal .dialog{position:relative;background:#fff;border-radius:12px;padding:20px;width:min(760px,94%);max-height:90vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.25);z-index:10}
+.order-modal .order-modal-close{position:absolute;right:12px;top:12px;background:transparent;border:none;font-size:1.3rem;color:#666;cursor:pointer}
+.order-modal .product-preview img{width:120px;height:auto;object-fit:contain;background:#F5F5F5;padding:12px;border-radius:8px}
+.order-modal label{font-size:0.85rem;color:#444;display:block;margin-bottom:6px}
+.order-modal select,.order-modal input[type=number]{width:100%;padding:8px 10px;border:1px solid #E5E5E5;border-radius:8px;background:#fff}
+
+/* Add to cart button - same style as order but larger */
+.add-to-cart-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;height:48px;border-radius:8px;background:#fff;color:#111;border:1px solid #E5E5E5;font-weight:700;padding:0 16px;cursor:pointer;transition:all .18s}
+.add-to-cart-btn:hover{background:#111;color:#fff;border-color:#111;transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.18)}
+
+/* Ensure modal inputs & labels responsive */
+.order-modal .dialog .d-flex > .flex-grow-1{min-width:0}

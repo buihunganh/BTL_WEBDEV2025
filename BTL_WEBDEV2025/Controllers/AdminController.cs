@@ -60,6 +60,67 @@ namespace BTL_WEBDEV2025.Controllers
             });
         }
 
+        // New: list orders for admin
+        [HttpGet("/admin/api/orders")]
+        public async Task<IActionResult> GetOrders()
+        {
+            if (!IsAdmin()) return Unauthorized();
+
+            var list = await _db.Orders
+                .Include(o => o.User)
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new
+                {
+                    o.Id,
+                    UserId = o.UserId,
+                    UserName = o.User != null ? o.User.FullName : "",
+                    o.CreatedAt,
+                    o.TotalAmount,
+                    o.PaymentMethod,
+                    o.Status,
+                    o.PaymentToken,
+                    Items = o.OrderDetails.Count
+                }).ToListAsync();
+
+            return Ok(list);
+        }
+
+        // New: get order details
+        [HttpGet("/admin/api/orders/{id:int}")]
+        public async Task<IActionResult> GetOrderDetails(int id)
+        {
+            if (!IsAdmin()) return Unauthorized();
+
+            var order = await _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            var dto = new
+            {
+                order.Id,
+                order.UserId,
+                UserName = order.User?.FullName ?? "",
+                order.CreatedAt,
+                order.TotalAmount,
+                order.PaymentMethod,
+                order.Status,
+                order.PaymentToken,
+                Items = order.OrderDetails.Select(od => new {
+                    od.Id,
+                    od.ProductId,
+                    ProductName = od.Product?.Name ?? "",
+                    od.Quantity,
+                    od.UnitPrice
+                }).ToList()
+            };
+
+            return Ok(dto);
+        }
+
         // =====================
         // REPORT (minimal): summary & timeseries by day
         // =====================

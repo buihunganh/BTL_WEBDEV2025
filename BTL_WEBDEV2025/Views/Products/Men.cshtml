@@ -11,7 +11,7 @@
             <a class="btn btn-outline-primary btn-sm rounded-pill me-2 mb-2" href="#all">All Brands</a>
             @if(brands != null){
             @foreach(var b in brands){
-                <a class="btn btn-outline-secondary btn-sm rounded-pill me-2 mb-2" href="#brand-@b.Replace(" ","-")">@b</a>
+                <a class="btn btn-outline-secondary btn-sm rounded-pill me-2 mb-2" href="#brand-@b.Replace(" ", "-")">@b</a>
             }}
         </div>
         <form class="row row-cols-2 row-cols-md-auto g-2 align-items-end filter-bar shadow-sm p-2 rounded bg-white flex-nowrap my-2" autocomplete="off" onsubmit="return false;">
@@ -51,7 +51,7 @@
         @foreach (var product in Model)
         {
             var brand = product.Brand?.Name ?? "Others";
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item" data-price="@product.Price" data-brand="@brand" data-name="@product.Name.ToLower()">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item" data-product-id="@product.Id" data-price="@product.Price" data-brand="@brand" data-name="@product.Name.ToLower()">
                 <div class="card men-card border rounded-4 h-100 bg-white">
                     <div class="d-flex align-items-end justify-content-center men-card-img-wrapper position-relative" style="background:#fff;">
                         @if (!string.IsNullOrEmpty(product.ImageUrl))
@@ -79,6 +79,7 @@
                             }
                         </div>
                     </div>
+                    <a href="#" class="order-btn" role="button">Order</a>
                 </div>
             </div>
         }
@@ -89,9 +90,9 @@
       foreach(var br in brands) {
         <section id="brand-@br.Replace(" ", "-")" class="mt-5">
             <h2 class="h4 fw-bold mb-3">@br</h2>
-            <div class="row g-3" id="menGrid">
+            <div class="row g-3">
             @foreach(var product in Model.Where(p => p.Brand?.Name == br)) {
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item" data-price="@product.Price" data-brand="@br" data-name="@product.Name.ToLower()">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 product-item" data-product-id="@product.Id" data-price="@product.Price" data-brand="@br" data-name="@product.Name.ToLower()">
                     <div class="card men-card border rounded-4 h-100 bg-white">
                         <div class="d-flex align-items-end justify-content-center men-card-img-wrapper position-relative" data-brand="@br">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
@@ -119,6 +120,7 @@
                                 }
                             </div>
                         </div>
+                        <a href="#" class="order-btn" role="button">Order</a>
                     </div>
                 </div>
             }

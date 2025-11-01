@@ -45,11 +45,37 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Products/Men
         public IActionResult Men()
         {
-            var brands = _db.Brands.Select(b => b.Name).ToList();
-            var products = _db.Products
-                .Include(p => p.Brand)
-                .Where(p => p.CategoryId == 1 || p.CategoryId == 4)
-                .ToList();
+            // Use TryGetProductsFromDb to be resilient if DB cannot connect
+            var all = TryGetProductsFromDb();
+
+            List<Product> products;
+            List<string> brands;
+
+            try
+            {
+                // Prefer DB-backed query when available to get brand data and category mapping
+                if (_db.Database.CanConnect())
+                {
+                    brands = _db.Brands.Select(b => b.Name).ToList();
+                    products = _db.Products
+                        .Include(p => p.Brand)
+                        .Where(p => p.CategoryId == 1 || p.CategoryId == 4)
+                        .ToList();
+                    ViewBag.Brands = brands;
+                    return View(products);
+                }
+            }
+            catch
+            {
+                // ignore and fallback to in-memory list
+            }
+
+            // Fallback: derive brands and products from the in-memory list
+            brands = all.Select(p => p.Brand?.Name ?? "Others").Distinct().ToList();
+            products = all.Where(p => string.Equals(p.Category, "Men", System.StringComparison.OrdinalIgnoreCase)
+                                       || string.Equals(p.Category, "Unisex", System.StringComparison.OrdinalIgnoreCase))
+                          .ToList();
+
             ViewBag.Brands = brands;
             return View(products);
         }
@@ -57,11 +83,33 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Products/Women
         public IActionResult Women()
         {
-            var brands = _db.Brands.Select(b => b.Name).ToList();
-            var products = _db.Products
-                .Include(p => p.Brand)
-                .Where(p => p.CategoryId == 2 || p.CategoryId == 4)
-                .ToList();
+            var all = TryGetProductsFromDb();
+            List<Product> products;
+            List<string> brands;
+
+            try
+            {
+                if (_db.Database.CanConnect())
+                {
+                    brands = _db.Brands.Select(b => b.Name).ToList();
+                    products = _db.Products
+                        .Include(p => p.Brand)
+                        .Where(p => p.CategoryId == 2 || p.CategoryId == 4)
+                        .ToList();
+                    ViewBag.Brands = brands;
+                    return View(products);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            brands = all.Select(p => p.Brand?.Name ?? "Others").Distinct().ToList();
+            products = all.Where(p => string.Equals(p.Category, "Women", System.StringComparison.OrdinalIgnoreCase)
+                                       || string.Equals(p.Category, "Unisex", System.StringComparison.OrdinalIgnoreCase))
+                          .ToList();
+
             ViewBag.Brands = brands;
             return View(products);
         }
@@ -69,11 +117,33 @@ namespace BTL_WEBDEV2025.Controllers
         // GET: Products/Kid
         public IActionResult Kid()
         {
-            var brands = _db.Brands.Select(b => b.Name).ToList();
-            var products = _db.Products
-                .Include(p => p.Brand)
-                .Where(p => p.CategoryId == 3 || p.CategoryId == 4)
-                .ToList();
+            var all = TryGetProductsFromDb();
+            List<Product> products;
+            List<string> brands;
+
+            try
+            {
+                if (_db.Database.CanConnect())
+                {
+                    brands = _db.Brands.Select(b => b.Name).ToList();
+                    products = _db.Products
+                        .Include(p => p.Brand)
+                        .Where(p => p.CategoryId == 3 || p.CategoryId == 4)
+                        .ToList();
+                    ViewBag.Brands = brands;
+                    return View(products);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            brands = all.Select(p => p.Brand?.Name ?? "Others").Distinct().ToList();
+            products = all.Where(p => string.Equals(p.Category, "Kid", System.StringComparison.OrdinalIgnoreCase)
+                                       || string.Equals(p.Category, "Unisex", System.StringComparison.OrdinalIgnoreCase))
+                          .ToList();
+
             ViewBag.Brands = brands;
             return View(products);
         }
@@ -123,7 +193,7 @@ namespace BTL_WEBDEV2025.Controllers
             {
                 if (_db.Database.CanConnect())
                 {
-                    var list = _db.Products.ToList();
+                    var list = _db.Products.Include(p => p.Brand).ToList();
                     if (list.Count > 0) return list;
                 }
             }

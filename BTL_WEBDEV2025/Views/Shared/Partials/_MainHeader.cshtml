@@ -1,3 +1,7 @@
+@{
+    var isAuth = (Context != null && Context.Session.GetInt32("UserId") != null) ? "true" : "false";
+}
+
 <!-- Main Header Navigation - Nike style -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
     <div class="container-fluid">
@@ -22,7 +26,7 @@
             </a>
             <a asp-controller="Cart" asp-action="Index" class="text-decoration-none position-relative nav-icon" style="color: #000; font-size: 1.3rem;">
                 <i class="bi bi-bag"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 2px 5px;">0</span>
+                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 2px 5px;">0</span>
             </a>
         </div>
         
@@ -67,19 +71,19 @@
                                 <div class="mega-col">
                                     <div class="mega-title">Top Brands</div>
                                     <ul class="mega-list">
-                                        <li><a href="#">Nike</a></li>
-                                        <li><a href="#">Adidas</a></li>
-                                        <li><a href="#">Balenciaga</a></li>
-                                        <li><a href="#">Louboutin</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Nike">Nike</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Adidas">Adidas</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Balenciaga">Balenciaga</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Louboutin">Louboutin</a></li>
                                     </ul>
                                 </div>
                                 <div class="mega-col">
                                     <div class="mega-title">More Brands</div>
                                     <ul class="mega-list">
-                                        <li><a href="#">Puma</a></li>
-                                        <li><a href="#">New Balance</a></li>
-                                        <li><a href="#">ASICS</a></li>
-                                        <li><a href="#">Reebok</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Puma">Puma</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-New-Balance">New Balance</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-ASICS">ASICS</a></li>
+                                        <li><a asp-controller="Products" asp-action="Women" asp-fragment="brand-Reebok">Reebok</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -94,19 +98,19 @@
                                 <div class="mega-col">
                                     <div class="mega-title">Top Brands</div>
                                     <ul class="mega-list">
-                                        <li><a href="#">Nike</a></li>
-                                        <li><a href="#">Adidas</a></li>
-                                        <li><a href="#">Balenciaga</a></li>
-                                        <li><a href="#">Louboutin</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Nike">Nike</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Adidas">Adidas</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Balenciaga">Balenciaga</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Louboutin">Louboutin</a></li>
                                     </ul>
                                 </div>
                                 <div class="mega-col">
                                     <div class="mega-title">More Brands</div>
                                     <ul class="mega-list">
-                                        <li><a href="#">Puma</a></li>
-                                        <li><a href="#">New Balance</a></li>
-                                        <li><a href="#">ASICS</a></li>
-                                        <li><a href="#">Reebok</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Puma">Puma</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-New-Balance">New Balance</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-ASICS">ASICS</a></li>
+                                        <li><a asp-controller="Products" asp-action="Kid" asp-fragment="brand-Reebok">Reebok</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -131,3 +135,157 @@
         </div>
     </div>
 </div>
+
+<!-- Order modal (shared) -->
+<div id="orderModal" class="order-modal" aria-hidden="true">
+  <div class="overlay" aria-hidden="true"></div>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="orderModalName">
+    <button type="button" class="order-modal-close" aria-label="Close">&times;</button>
+    <div class="order-modal-body">
+      <div class="d-flex gap-3 align-items-start">
+        <div class="product-preview">
+          <img id="orderModalImage" src="" alt="" />
+        </div>
+        <div class="flex-grow-1">
+          <h5 id="orderModalName" class="mb-1">Product name</h5>
+          <div id="orderModalPrice" class="text-muted mb-3">$0</div>
+
+          <div class="mb-2">
+            <label for="orderSize">Size</label>
+            <select id="orderSize"></select>
+          </div>
+          <div class="mb-2">
+            <label for="orderColor">Color</label>
+            <select id="orderColor"></select>
+          </div>
+          <div class="mb-2">
+            <label for="orderQty">Quantity</label>
+            <input id="orderQty" type="number" min="1" value="1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <button id="addToCartBtn" class="add-to-cart-btn">Add to cart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// expose auth flag from server
+window.isAuthenticated = @isAuth;
+(function(){
+    async function updateCartBadge(){
+        const badge = document.getElementById('cartBadge');
+        try{
+            if(window.isAuthenticated){
+                const res = await fetch('/Cart/GetCartCount');
+                if(res.ok){
+                    const j = await res.json();
+                    if(badge) badge.textContent = (j.count || 0);
+                    return;
+                }
+            }
+            // fallback: localStorage
+            const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+            if(badge) badge.textContent = cart.length || 0;
+        }catch(e){ if(badge) badge.textContent = 0; }
+    }
+    updateCartBadge();
+
+    const modal = document.getElementById('orderModal');
+    if(!modal) return;
+    const overlay = modal.querySelector('.overlay');
+    const closeBtn = modal.querySelector('.order-modal-close');
+    const imgEl = modal.querySelector('#orderModalImage');
+    const nameEl = modal.querySelector('#orderModalName');
+    const priceEl = modal.querySelector('#orderModalPrice');
+    const sizeEl = modal.querySelector('#orderSize');
+    const colorEl = modal.querySelector('#orderColor');
+    const qtyEl = modal.querySelector('#orderQty');
+    const addBtn = modal.querySelector('#addToCartBtn');
+
+    function showModal(){ modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+    function hideModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+    document.addEventListener('click', function(e){
+        const btn = e.target.closest('.order-btn');
+        if(!btn) return;
+        e.preventDefault();
+        const item = btn.closest('.product-item');
+        if(!item) return;
+
+        const name = item.querySelector('.card-body h5')?.textContent?.trim() || item.getAttribute('data-name') || '';
+        const price = item.getAttribute('data-price') || (item.querySelector('.card-body .fw-bold')?.textContent || '').replace('$','');
+        const img = item.querySelector('.card-thumb-img')?.getAttribute('src') || '';
+        const productId = item.getAttribute('data-product-id') || '';
+
+        if(imgEl) imgEl.src = img;
+        if(nameEl) nameEl.textContent = name;
+        if(priceEl) priceEl.textContent = price && price.toString().length ? (price.toString().startsWith('$') ? price : '$'+price) : '$0';
+
+        // populate defaults for size/color
+        if(sizeEl){ sizeEl.innerHTML=''; ['6','6.5','7','7.5','8','8.5','9','10','11','12'].forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; sizeEl.appendChild(o); }); }
+        if(colorEl){ colorEl.innerHTML=''; ['White','Black','Red','Blue','Green','Grey'].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; colorEl.appendChild(o); }); }
+        if(qtyEl) qtyEl.value = 1;
+
+        modal.dataset.name = name; modal.dataset.price = price; modal.dataset.img = img; modal.dataset.productId = productId;
+
+        showModal();
+    });
+
+    overlay.addEventListener('click', hideModal);
+    closeBtn.addEventListener('click', hideModal);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('show')) hideModal(); });
+
+    addBtn.addEventListener('click', async function(){
+        const item = {
+            name: modal.dataset.name || nameEl.textContent,
+            price: modal.dataset.price || priceEl.textContent,
+            img: modal.dataset.img || imgEl.src,
+            size: sizeEl?.value || '',
+            color: colorEl?.value || '',
+            qty: parseInt(qtyEl?.value||1,10),
+            productId: modal.dataset.productId || null
+        };
+
+        if(!window.isAuthenticated){
+            // show toast and redirect to login
+            const toast = document.createElement('div');
+            toast.textContent = 'Please sign in before adding to cart';
+            toast.style.cssText = 'position:fixed;right:20px;bottom:20px;background:#ef4a64;color:#fff;padding:10px 14px;border-radius:8px;z-index:99999;box-shadow:0 8px 20px rgba(0,0,0,0.2);';
+            document.body.appendChild(toast);
+            setTimeout(()=>{ toast.remove(); window.location.href = '/Account/Login'; },1200);
+            return;
+        }
+
+        // send to server using form-encoded POST to Cart/AddToCart
+        try{
+            const form = new URLSearchParams();
+            form.append('productId', item.productId || '0');
+            form.append('productName', item.name || '');
+            form.append('price', (item.price||'').toString().replace('$',''));
+            form.append('imageUrl', item.img || '');
+            form.append('quantity', (item.qty||1).toString());
+            form.append('size', item.size || '');
+            form.append('color', item.color || '');
+
+            const res = await fetch('/Cart/AddToCart', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form.toString() });
+            if(res.ok){
+                const j = await res.json();
+                updateCartBadge();
+                hideModal();
+                const toast = document.createElement('div');
+                toast.textContent = 'Added to cart';
+                toast.style.cssText = 'position:fixed;right:20px;bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:8px;z-index:99999;box-shadow:0 8px 20px rgba(0,0,0,0.2);';
+                document.body.appendChild(toast);
+                setTimeout(()=>toast.remove(),1600);
+            } else {
+                const txt = await res.text();
+                alert('Failed to add to cart: '+txt);
+            }
+        }catch(e){ console.error(e); alert('Error adding to cart'); }
+    });
+})();
+</script>
